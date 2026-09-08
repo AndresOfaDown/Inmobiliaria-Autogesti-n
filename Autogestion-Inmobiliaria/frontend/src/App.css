@@ -1,9 +1,10 @@
-/* ===== Landing Page Layout ===== */
+/* ===== Landing Page Layout (Tema InmoCMS - Azul Real & Blanco) ===== */
 .landing-page {
   position: relative;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  background-color: #f1f5f9;
 }
 
 /* ===== Background ===== */
@@ -17,29 +18,34 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 30%;
+  filter: saturate(1.15) contrast(1.02);
 }
 
 .landing-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    135deg,
-    rgba(15, 20, 25, 0.92) 0%,
-    rgba(15, 20, 25, 0.80) 40%,
-    rgba(15, 20, 25, 0.65) 100%
+    to right,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.78) 36%,
+    rgba(255, 255, 255, 0.25) 72%,
+    rgba(255, 255, 255, 0.45) 100%
   );
 }
 
-/* ===== Navbar ===== */
+/* ===== Navbar (Exacto a InmoCMS: Barra Blanca Superior, Logo Azul) ===== */
 .landing-nav {
   position: relative;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 48px;
-  animation: fadeIn 0.6s ease;
+  padding: 16px 48px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  animation: fadeIn 0.5s ease;
 }
 
 .nav-brand {
@@ -49,16 +55,16 @@
 }
 
 .nav-logo {
-  color: var(--gold-400);
-  filter: drop-shadow(0 0 8px rgba(212, 168, 83, 0.4));
+  color: #0066ff;
+  filter: drop-shadow(0 2px 4px rgba(0, 102, 255, 0.2));
 }
 
 .nav-name {
   font-family: var(--font-heading);
   font-size: 20px;
-  font-weight: 600;
-  color: var(--dark-50);
-  letter-spacing: -0.3px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.4px;
 }
 
 /* ===== Hero Content ===== */
@@ -70,7 +76,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 64px;
-  padding: 0 48px 40px;
+  padding: 40px 48px 60px;
   max-width: 1280px;
   margin: 0 auto;
   width: 100%;
@@ -80,19 +86,19 @@
 .hero-text {
   flex: 1;
   max-width: 560px;
-  animation: fadeInUp 0.8s var(--transition-slow) both;
+  animation: fadeInUp 0.7s var(--transition-slow) both;
 }
 
 .hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 16px 6px 10px;
+  padding: 6px 16px 6px 12px;
   font-size: 13px;
-  font-weight: 500;
-  color: var(--gold-400);
-  background: rgba(212, 168, 83, 0.1);
-  border: 1px solid rgba(212, 168, 83, 0.2);
+  font-weight: 600;
+  color: #0066ff;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
   border-radius: var(--radius-full);
   margin-bottom: 24px;
   letter-spacing: 0.5px;
@@ -102,23 +108,23 @@
 .badge-dot {
   width: 8px;
   height: 8px;
-  background: var(--gold-400);
+  background: #0066ff;
   border-radius: 50%;
-  animation: pulseGlow 2s ease-in-out infinite;
-  box-shadow: 0 0 8px rgba(212, 168, 83, 0.6);
+  box-shadow: 0 0 6px rgba(0, 102, 255, 0.5);
 }
 
 .hero-title {
   font-size: 52px;
-  font-weight: 700;
-  line-height: 1.1;
+  font-weight: 800;
+  line-height: 1.15;
   letter-spacing: -1.5px;
   margin-bottom: 20px;
-  color: var(--dark-50);
+  color: #0f172a;
 }
 
 .hero-highlight {
-  background: linear-gradient(135deg, var(--gold-300), var(--gold-500));
+  color: #0066ff;
+  background: linear-gradient(135deg, #0066ff, #2563eb);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -127,21 +133,21 @@
 .hero-subtitle {
   font-size: 17px;
   line-height: 1.7;
-  color: var(--dark-300);
+  color: #475569;
   margin-bottom: 36px;
-  max-width: 460px;
+  max-width: 480px;
 }
 
-/* — Stats — */
+/* — Stats (Tarjeta Blanca con Sombra Sutil) — */
 .hero-stats {
   display: flex;
   align-items: center;
-  gap: 28px;
-  padding: 24px 28px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 32px;
+  padding: 22px 28px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
 }
 
 .stat {
@@ -154,21 +160,22 @@
 .stat-number {
   font-family: var(--font-heading);
   font-size: 28px;
-  font-weight: 700;
-  color: var(--gold-400);
+  font-weight: 800;
+  color: #0066ff;
   letter-spacing: -0.5px;
 }
 
 .stat-label {
   font-size: 13px;
-  color: var(--dark-300);
-  letter-spacing: 0.3px;
+  font-weight: 500;
+  color: #64748b;
+  letter-spacing: 0.2px;
 }
 
 .stat-divider {
   width: 1px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.1);
+  background: #e2e8f0;
 }
 
 /* — Hero Form — */
@@ -183,15 +190,16 @@
   text-align: center;
   padding: 20px 48px;
   font-size: 13px;
-  color: var(--dark-400);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: #64748b;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
 }
 
 /* ===== Responsive ===== */
 @media (max-width: 1024px) {
   .landing-content {
     flex-direction: column;
-    padding: 20px 24px 40px;
+    padding: 30px 24px 50px;
     gap: 40px;
     justify-content: center;
   }
@@ -209,7 +217,7 @@
   }
 
   .hero-subtitle {
-    max-width: 500px;
+    max-width: 520px;
   }
 
   .hero-stats {
@@ -223,7 +231,7 @@
   }
 
   .landing-nav {
-    padding: 16px 24px;
+    padding: 14px 24px;
   }
 
   .landing-footer {
@@ -242,7 +250,7 @@
   }
 
   .hero-stats {
-    gap: 16px;
+    gap: 18px;
     padding: 18px 16px;
   }
 
@@ -251,6 +259,6 @@
   }
 
   .nav-name {
-    font-size: 16px;
+    font-size: 17px;
   }
 }

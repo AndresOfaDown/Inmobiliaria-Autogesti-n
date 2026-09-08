@@ -1,28 +1,43 @@
-/* ===== Design System — Autogestión Inmobiliaria ===== */
+@import "tailwindcss";
+
+/* ===== Design System — Autogestión Inmobiliaria (Tema InmoCMS - Azul Real & Blanco Limpio) ===== */
 
 :root {
-  /* — Color Palette — */
-  --gold-50: #fdf8e8;
-  --gold-100: #f9edc4;
-  --gold-200: #f0d88a;
-  --gold-300: #e5bf4e;
-  --gold-400: #d4a853;
-  --gold-500: #c4942a;
-  --gold-600: #a8771d;
-  --gold-700: #865c17;
+  /* — Palette Inspirada en InmoCMS — */
+  --primary-50: #eff6ff;
+  --primary-100: #dbeafe;
+  --primary-200: #bfdbfe;
+  --primary-300: #93c5fd;
+  --primary-400: #60a5fa;
+  --primary-500: #3b82f6;
+  --primary-600: #2563eb;
+  --primary-700: #1d4ed8;
+  --primary-800: #1e40af;
+  --primary-900: #1e3a8a;
+  --primary: #0066ff;
+  --primary-hover: #0052cc;
 
-  --dark-50: #f5f5f6;
-  --dark-100: #e5e5e7;
-  --dark-200: #cdced1;
-  --dark-300: #9ea0a6;
-  --dark-400: #6c6f78;
-  --dark-500: #44474f;
-  --dark-600: #2a2d35;
-  --dark-700: #1e2028;
-  --dark-800: #151720;
-  --dark-900: #0f1419;
+  /* — Escala Neutra Limpia — */
+  --bg-page: #f1f5f9;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
 
-  --success: #22c55e;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+
+  --dark-50: #0f172a;
+  --dark-100: #1e293b;
+  --dark-200: #334155;
+  --dark-300: #64748b;
+  --dark-400: #94a3b8;
+  --dark-500: #cbd5e1;
+  --dark-600: #e2e8f0;
+  --dark-700: #f1f5f9;
+  --dark-800: #f8fafc;
+  --dark-900: #ffffff;
+
+  --success: #10b981;
   --error: #ef4444;
   --warning: #f59e0b;
 
@@ -30,16 +45,16 @@
   --font-heading: 'Outfit', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
 
-  /* — Shadows — */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.5);
-  --shadow-gold: 0 4px 20px rgba(212, 168, 83, 0.3);
+  /* — Shadows Suaves & Elegantes — */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-primary: 0 4px 14px 0 rgba(0, 102, 255, 0.35);
 
-  /* — Glassmorphism — */
-  --glass-bg: rgba(21, 23, 32, 0.75);
-  --glass-border: rgba(212, 168, 83, 0.15);
-  --glass-blur: blur(20px);
+  /* — Cards & Glass — */
+  --glass-bg: #ffffff;
+  --glass-border: #e2e8f0;
+  --glass-blur: blur(10px);
 
   /* — Transitions — */
   --transition-fast: 150ms ease;
@@ -48,8 +63,8 @@
 
   /* — Border Radius — */
   --radius-sm: 6px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
 }
 
@@ -70,8 +85,8 @@ body {
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.6;
-  color: var(--dark-100);
-  background: var(--dark-900);
+  color: var(--text-main);
+  background: var(--bg-page);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -85,19 +100,19 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  font-weight: 600;
-  color: var(--dark-50);
+  font-weight: 700;
+  color: var(--text-main);
   line-height: 1.2;
 }
 
 a {
-  color: var(--gold-400);
+  color: var(--primary);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 a:hover {
-  color: var(--gold-300);
+  color: var(--primary-hover);
 }
 
 button {
@@ -115,7 +130,7 @@ input {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -128,17 +143,7 @@ input {
   to { opacity: 1; }
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-@keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 5px rgba(212, 168, 83, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(212, 168, 83, 0.4); }
+  50% { transform: translateY(-6px); }
 }
