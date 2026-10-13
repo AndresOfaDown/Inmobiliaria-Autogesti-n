@@ -1,0 +1,26 @@
+Sprint 1
+HU-10	Gestión de registro y autenticación de usuarios
+HU-11	Gestión y configuración de perfiles de usuario
+HU-12	Publicación y gestión de inmuebles (CRUD)
+HU-13	Gestión de carga multimedia avanzada
+HU-14	Motor de búsqueda avanzada con filtros interactivos
+HU-15	Visualización detallada de inmuebles
+HU-16	Gestionar Categoría
+HU-17	Gestionar Dirección
+HU-18	Gestionar Favoritos
+Sprint 2
+HU-19	Sistema de notificaciones y alertas
+HU-20	Generación dinámica de contratos (PDF) + Firma electrónica
+HU-21	Gestionar Tipo Contrato
+HU-22	Verificación legal automatizada (OCR + NLP)
+HU-23	Sistema de reseñas y comentarios
+HU-24	Panel de reportes y gráficos
+HU-25	Exploración inmersiva mediante visor 360°/3D
+HU-26	Generación y registro de contratos inteligentes (Smart Contracts)
+Sprint 3
+HU-27	Registrar y gestionar dispositivos IoT 
+HU-28	Controlar dispositivos y acceso digital
+HU-29	Reglas de acceso IoT por contrato
+HU-30	Historial de acciones IoT
+HU-31	Cargar el Dataset
+HU-31	Chat con propietarios

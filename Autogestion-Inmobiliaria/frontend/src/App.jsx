@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import AuthForm from './components/AuthForm';
 import VerifyEmailPage from './pages/VerifyEmailPage';
-import PropietarioDashboard from './pages/PropietarioDashboard';
-import InquilinoDashboard from './pages/InquilinoDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import UsuarioDashboard from './pages/UsuarioDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
 import heroBg from './assets/hero-bg.jpg';
@@ -15,7 +15,7 @@ function LandingPage() {
     <div className="landing-page">
       {/* Background */}
       <div className="landing-bg">
-        <img src={heroBg} alt="" className="landing-bg-img" />
+        <img src={heroBg} alt="Condominio Residencial" className="landing-bg-img" />
         <div className="landing-overlay" />
       </div>
 
@@ -42,10 +42,10 @@ function LandingPage() {
         {isAuthenticated && (
           <div className="flex items-center gap-3">
             <Link
-              to={role === 'PROPIETARIO' ? '/dashboard/propietario' : '/dashboard/inquilino'}
-              className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition-all shadow-md shadow-amber-500/20"
+              to={role === 'ADMIN' ? '/dashboard/admin' : '/dashboard/usuario'}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-blue-500/20"
             >
-              Ir a mi Panel ({role === 'PROPIETARIO' ? 'Propietario' : 'Inquilino'})
+              Ir a mi Panel ({role === 'ADMIN' ? 'Administrador' : 'Usuario'})
             </Link>
           </div>
         )}
@@ -56,14 +56,14 @@ function LandingPage() {
         <div className="hero-text">
           <div className="hero-badge">
             <span className="badge-dot" />
-            Plataforma de Gestión
+            Plataforma Inmobiliaria SAIPI
           </div>
           <h1 className="hero-title">
             Tu hogar ideal,<br />
             <span className="hero-highlight">a un clic de distancia</span>
           </h1>
           <p className="hero-subtitle">
-            Administra tus propiedades, contratos y pagos desde un solo lugar.
+            Administra tus propiedades, contratos y arriendos desde un solo lugar.
             Accede a tu cuenta para comenzar.
           </p>
 
@@ -93,7 +93,7 @@ function LandingPage() {
 
       {/* Footer */}
       <footer className="landing-footer">
-        <p>© 2026 Autogestión Inmobiliaria. Todos los derechos reservados.</p>
+        <p>© 2026 Autogestión Inmobiliaria SAIPI. Todos los derechos reservados.</p>
       </footer>
     </div>
   );
@@ -103,29 +103,35 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Página principal con formulario interactivo integrado */}
+        {/* Página principal con formulario integrado */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/registro" element={<Navigate to="/" replace />} />
         <Route path="/verificar-correo" element={<VerifyEmailPage />} />
 
-        {/* Rutas Protegidas por Rol */}
+        {/* Dashboard de Administrador */}
         <Route
-          path="/dashboard/propietario"
+          path="/dashboard/admin"
           element={
-            <ProtectedRoute allowedRoles={['PROPIETARIO', 'ADMIN']}>
-              <PropietarioDashboard />
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />
+
+        {/* Dashboard de Usuario Inmobiliario Unificado */}
         <Route
-          path="/dashboard/inquilino"
+          path="/dashboard/usuario"
           element={
-            <ProtectedRoute allowedRoles={['INQUILINO', 'ADMIN']}>
-              <InquilinoDashboard />
+            <ProtectedRoute allowedRoles={['USUARIO', 'ADMIN']}>
+              <UsuarioDashboard />
             </ProtectedRoute>
           }
         />
+
+        {/* Redirecciones de compatibilidad para rutas anteriores */}
+        <Route path="/dashboard/propietario" element={<Navigate to="/dashboard/usuario" replace />} />
+        <Route path="/dashboard/inquilino" element={<Navigate to="/dashboard/usuario" replace />} />
 
         {/* Redirección por defecto */}
         <Route path="*" element={<Navigate to="/" replace />} />

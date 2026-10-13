@@ -18,11 +18,22 @@ export const registerSchema = z
       .max(150, 'El apellido no puede exceder 150 caracteres'),
     email: z
       .string()
+      .min(1, 'El correo electrónico es requerido')
       .email('Ingresa un correo electrónico válido'),
-    role: z
-      .enum(['PROPIETARIO', 'INQUILINO'], {
-        errorMap: () => ({ message: 'Selecciona un rol válido (Propietario o Inquilino)' }),
-      }),
+    fecha_nacimiento: z
+      .string()
+      .min(1, 'La fecha de nacimiento es obligatoria')
+      .refine((val) => {
+        const birthDate = new Date(val);
+        if (isNaN(birthDate.getTime())) return false;
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        return age >= 18;
+      }, 'Debes ser mayor de edad (al menos 18 años cumplidos) para registrarte'),
     telefono: z
       .string()
       .regex(/^[+]?[0-9\s\-()]{7,20}$/, 'Formato de teléfono inválido (ej: +591 77084747 o 77084747)')

@@ -23,12 +23,10 @@ export default function LoginPage() {
       const from = location.state?.from?.pathname;
       if (from) {
         navigate(from, { replace: true });
-      } else if (role === 'PROPIETARIO') {
-        navigate('/dashboard/propietario', { replace: true });
-      } else if (role === 'INQUILINO') {
-        navigate('/dashboard/inquilino', { replace: true });
+      } else if (role === 'ADMIN') {
+        navigate('/dashboard/admin', { replace: true });
       } else {
-        navigate('/dashboard/propietario', { replace: true });
+        navigate('/dashboard/usuario', { replace: true });
       }
     }
   }, [isAuthenticated, role, navigate, location]);
@@ -62,10 +60,10 @@ export default function LoginPage() {
     setFormErrors({});
     const res = await login(formData.email, formData.password);
     if (res.success && res.user) {
-      if (res.user.role === 'PROPIETARIO') {
-        navigate('/dashboard/propietario');
+      if (res.user.role === 'ADMIN') {
+        navigate('/dashboard/admin');
       } else {
-        navigate('/dashboard/inquilino');
+        navigate('/dashboard/usuario');
       }
     }
   };

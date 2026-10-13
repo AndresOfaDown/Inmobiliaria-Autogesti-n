@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { registerSchema, loginSchema } from '../schemas/authSchemas';
-import { Eye, EyeOff, Building, Home, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2, AlertCircle, Calendar } from 'lucide-react';
 import './AuthForm.css';
 
 function AuthForm() {
   const navigate = useNavigate();
   const { login, register, loading, error, clearError } = useAuthStore();
 
-  const [mode, setMode] = useState('registro'); // 'login' | 'registro' (en la captura muestra 'Crear Cuenta' activo)
+  const [mode, setMode] = useState('registro'); // 'login' | 'registro'
   const [successMessage, setSuccessMessage] = useState(null);
 
   // Toggle de visibilidad de contraseñas
@@ -27,12 +27,19 @@ function AuthForm() {
     first_name: '',
     last_name: '',
     email: '',
-    role: 'PROPIETARIO', // Por defecto PROPIETARIO
+    fecha_nacimiento: '',
     telefono: '',
     documento_identidad: '',
     password: '',
     password_confirm: '',
   });
+
+  // Fecha máxima permitida (hoy hace 18 años)
+  const maxBirthDate = (() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 18);
+    return d.toISOString().split('T')[0];
+  })();
 
   const clearMessages = () => {
     setSuccessMessage(null);
@@ -63,10 +70,6 @@ function AuthForm() {
     if (error) clearError();
   };
 
-  const handleRoleChange = (role) => {
-    setRegistroData((prev) => ({ ...prev, role }));
-  };
-
   // Criterios de contraseña calculados
   const passwordCriteria = {
     length: registroData.password.length >= 8,
@@ -79,7 +82,6 @@ function AuthForm() {
     e.preventDefault();
     clearMessages();
 
-    // Validación Zod
     const validation = loginSchema.safeParse(loginData);
     if (!validation.success) {
       const errors = {};
@@ -94,12 +96,12 @@ function AuthForm() {
     if (res.success && res.user) {
       setSuccessMessage(`¡Bienvenido/a, ${res.user.first_name || 'Usuario'}!`);
       setTimeout(() => {
-        if (res.user.role === 'PROPIETARIO') {
-          navigate('/dashboard/propietario');
+        if (res.user.role === 'ADMIN') {
+          navigate('/dashboard/admin');
         } else {
-          navigate('/dashboard/inquilino');
+          navigate('/dashboard/usuario');
         }
-      }, 700);
+      }, 600);
     }
   };
 
@@ -107,7 +109,6 @@ function AuthForm() {
     e.preventDefault();
     clearMessages();
 
-    // Validación Zod
     const validation = registerSchema.safeParse(registroData);
     if (!validation.success) {
       const errors = {};
@@ -124,12 +125,8 @@ function AuthForm() {
     if (res.success) {
       setSuccessMessage('¡Cuenta creada exitosamente! Redirigiendo a tu panel...');
       setTimeout(() => {
-        if (registroData.role === 'PROPIETARIO') {
-          navigate('/dashboard/propietario');
-        } else {
-          navigate('/dashboard/inquilino');
-        }
-      }, 900);
+        navigate('/dashboard/usuario');
+      }, 800);
     }
   };
 
@@ -234,31 +231,6 @@ function AuthForm() {
       {/* Registro Form */}
       {mode === 'registro' && (
         <form onSubmit={handleRegistroSubmit} className="auth-form" id="registro-form">
-          {/* Selector de Rol HU-10 */}
-          <div className="role-selector-container">
-            <label>Tipo de Usuario</label>
-            <div className="role-selector">
-              <button
-                type="button"
-                id="role-prop"
-                className={`role-pill ${registroData.role === 'PROPIETARIO' ? 'active' : ''}`}
-                onClick={() => handleRoleChange('PROPIETARIO')}
-              >
-                <Building size={15} />
-                <span>Soy Propietario</span>
-              </button>
-              <button
-                type="button"
-                id="role-inq"
-                className={`role-pill ${registroData.role === 'INQUILINO' ? 'active' : ''}`}
-                onClick={() => handleRoleChange('INQUILINO')}
-              >
-                <Home size={15} />
-                <span>Soy Inquilino</span>
-              </button>
-            </div>
-          </div>
-
           {/* Nombre y Apellido */}
           <div className="input-row">
             <div className="input-group">
@@ -305,15 +277,34 @@ function AuthForm() {
             {fieldErrors.email && <span className="field-error">• {fieldErrors.email}</span>}
           </div>
 
+          {/* Fecha de Nacimiento (Mayor de 18 años obligatorio) */}
+          <div className="input-group">
+            <label htmlFor="reg-fecha-nacimiento">
+              Fecha de Nacimiento <span style={{ color: '#0066ff', fontWeight: 'bold' }}>(Mayor de 18 años)</span>
+            </label>
+            <input
+              id="reg-fecha-nacimiento"
+              type="date"
+              name="fecha_nacimiento"
+              max={maxBirthDate}
+              value={registroData.fecha_nacimiento}
+              onChange={handleRegistroChange}
+              required
+            />
+            {fieldErrors.fecha_nacimiento && (
+              <span className="field-error">• {fieldErrors.fecha_nacimiento}</span>
+            )}
+          </div>
+
           {/* Teléfono y Documento de Identidad */}
           <div className="input-row">
             <div className="input-group">
-              <label htmlFor="reg-telefono">Teléfono (opcional)</label>
+              <label htmlFor="reg-telefono">Teléfono</label>
               <input
                 id="reg-telefono"
                 type="tel"
                 name="telefono"
-                placeholder="+54 11 1234 5678"
+                placeholder="+591 77084747"
                 value={registroData.telefono}
                 onChange={handleRegistroChange}
               />
@@ -390,7 +381,7 @@ function AuthForm() {
             </div>
           </div>
 
-          {/* Checklist en tiempo real de contraseña */}
+          {/* Checklist de contraseña */}
           <div className="password-checklist">
             <div className={`checklist-item ${passwordCriteria.length ? 'valid' : ''}`}>
               <span>{passwordCriteria.length ? '✓' : '•'}</span>

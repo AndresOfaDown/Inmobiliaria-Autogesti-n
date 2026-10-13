@@ -43,11 +43,14 @@ export const useAuthStore = create((set, get) => ({
 
       return { success: true, user: usuario };
     } catch (err) {
+      console.error('Login error details:', err);
       const errorMsg =
         err.response?.data?.detail ||
         err.response?.data?.error ||
         (err.response?.data?.non_field_errors && err.response.data.non_field_errors[0]) ||
-        'Error al iniciar sesión. Verifica tus credenciales.';
+        (err.code === 'ERR_NETWORK' || !err.response
+          ? 'Error de conexión con el backend. Verifica que el servidor esté activo en http://localhost:8000.'
+          : 'Error al iniciar sesión. Verifica tus credenciales.');
 
       set({ error: errorMsg, loading: false });
       return { success: false, error: errorMsg };
