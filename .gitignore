@@ -1,0 +1,11 @@
+﻿# Carpetas y archivos excluidos
+/Autogestion-Inmobiliaria/
+/Documentacion/
+CredencialesInmobiliario.txt
+Casos de Uso.txt
+
+# Dependencias y entornos
+node_modules/
+dist/
+.env
+uploads/
