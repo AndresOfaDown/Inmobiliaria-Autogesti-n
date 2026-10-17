@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Rol {
+  id          Int       @id @default(autoincrement())
+  nombre      String    @unique // 'admin' | 'usuario'
+  descripcion String    // 'Administrador' | 'Usuario'
+  usuarios    Usuario[]
+
+  @@map("roles")
+}
+
+model Usuario {
+  id               Int        @id @default(autoincrement())
+  email            String     @unique
+  password         String
+  first_name       String
+  last_name        String
+  telefono         String?
+  ci               String?
+  fecha_nacimiento DateTime?
+  direccion        String?
+  foto             String?
+  activo           Boolean    @default(true)
+  favoritos        Json?      @default("[]") // [{ id, inmueble_id, creado }]
+
+  // Relación con roles
+  rol_id           Int        @default(2)
+  rol_relacion     Rol        @relation(fields: [rol_id], references: [id], onDelete: Restrict)
+
+  // Relación con inmuebles
+  inmuebles        Inmueble[]
+
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@map("usuarios")
+}
+
+model TipoInmueble {
+  id          Int        @id @default(autoincrement())
+  nombre      String     @unique // 'Casa', 'Departamento', 'Terreno', 'Oficina', etc.
+  descripcion String?
+  inmuebles   Inmueble[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("tipos_inmuebles")
+}
+
+model Inmueble {
+  id                  Int          @id @default(autoincrement())
+  titulo              String
+  descripcion         String?      @db.Text
+
+  tipo_id             Int
+  tipo_relacion       TipoInmueble @relation(fields: [tipo_id], references: [id], onDelete: Restrict)
+
+  propietario_id      Int
+  propietario_relacion Usuario    @relation(fields: [propietario_id], references: [id], onDelete: Cascade)
+
+  ciudad              String?
+  zona                String?
+  calle               String?
+  referencia          String?
+  direccion           Json?        // { ciudad, zona, calle, referencia }
+
+  precio              Decimal?     @db.Decimal(12, 2)
+  tipo_oferta         String       @default("alquiler") // 'alquiler' | 'venta' | 'anticretico'
+  valor_activo        Decimal?     @db.Decimal(12, 2)
+  superficie          Decimal?     @db.Decimal(10, 2)
+  largo               Decimal?     @db.Decimal(10, 2)
+  ancho               Decimal?     @db.Decimal(10, 2)
+  habitaciones        Int          @default(0)
+  banos               Int          @default(0)
+  garaje              Boolean      @default(false)
+
+  // Estados: 'disponible' / 'publicado', 'borrador', 'pausado', 'oculto', 'ocupado', 'reservado', 'mantenimiento', 'baja'
+  estado              String       @default("disponible")
+  gps                 String?
+  verificacion_estado String       @default("no_solicitado")
+
+  imagen_principal    String?
+  multimedia          Json?        @default("[]") // [{ id, tipo, archivo, principal, descripcion, orden }]
+  publicaciones       Json?        @default("[]") // [{ id, tipo_oferta, precio, estado }]
+  horarios            Json?        @default("[]") // [{ id, dia_semana, hora_inicio, hora_fin, activo }]
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@map("inmuebles")
+}

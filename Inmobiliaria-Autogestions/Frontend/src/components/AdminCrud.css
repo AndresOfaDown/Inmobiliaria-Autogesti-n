@@ -1,0 +1,487 @@
+/* ─── CSS para AdminCrud (Panel de Administración) ─────────────────── */
+
+.admin-crud-container {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.admin-crud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.admin-crud-header-info {
+  flex: 1;
+  min-width: 200px;
+}
+
+.admin-crud-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+}
+
+.admin-crud-subtitle {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.admin-crud-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ─── Buscador ──────────────────────────────────────────────────────── */
+.admin-crud-searchbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.admin-crud-search-input-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+}
+
+.admin-crud-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.admin-crud-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  border: 1px solid #e2e8f0;
+  borderRadius: 10px;
+  font-size: 0.875rem;
+  background: #f8fafc;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-crud-search-input:focus {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+  background: #ffffff;
+}
+
+.admin-crud-badge {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ─── Botones ───────────────────────────────────────────────────────── */
+.admin-crud-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+}
+
+.admin-crud-btn-primary {
+  background: #0ea5e9;
+  color: #ffffff;
+}
+
+.admin-crud-btn-primary:hover {
+  background: #0284c7;
+  transform: translateY(-1px);
+}
+
+.admin-crud-btn-primary:active {
+  transform: translateY(0);
+}
+
+.admin-crud-btn-secondary {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+.admin-crud-btn-secondary:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.admin-crud-btn-edit {
+  background: #0ea5e9;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.admin-crud-btn-edit:hover {
+  background: #0284c7;
+}
+
+.admin-crud-btn-delete {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 6px;
+  transition: all 0.15s ease;
+}
+
+.admin-crud-btn-delete:hover {
+  background: #dc2626;
+}
+
+/* ─── Tabla y Envoltura ──────────────────────────────────────────────── */
+.admin-crud-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-crud-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-crud-th {
+  padding: 14px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+.admin-crud-td {
+  padding: 14px 16px;
+  font-size: 0.85rem;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.admin-crud-row {
+  transition: background-color 0.15s ease;
+}
+
+.admin-crud-row:hover {
+  background-color: #f8fafc;
+}
+
+.admin-crud-empty {
+  padding: 48px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* ─── Paginación ────────────────────────────────────────────────────── */
+.admin-crud-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-crud-pagination-info {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.admin-crud-pagination-buttons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.admin-crud-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.admin-crud-page-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.admin-crud-page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-crud-page-btn-active {
+  background: #0ea5e9;
+  color: #ffffff;
+  border-color: #0ea5e9;
+  font-weight: 700;
+}
+
+/* ─── Modal y Formulario ────────────────────────────────────────────── */
+.admin-crud-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.admin-crud-modal {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  animation: slideUp 0.25s ease-out;
+}
+
+.admin-crud-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  color: #1e293b;
+}
+
+.admin-crud-field-group {
+  margin-bottom: 14px;
+}
+
+.admin-crud-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-crud-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  outline: none;
+  background: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-crud-input:focus {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+}
+
+.admin-crud-input-disabled {
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  cursor: not-allowed;
+}
+
+.admin-crud-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.admin-crud-select:focus {
+  border-color: #0ea5e9;
+}
+
+.admin-crud-error-box {
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #dc2626;
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.admin-crud-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* ─── Animaciones ───────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ─── Media Queries (Responsiveness) ────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .admin-crud-container {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-crud-container {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .admin-crud-title {
+    font-size: 1.35rem;
+  }
+
+  .admin-crud-header {
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+
+  .admin-crud-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .admin-crud-header-actions .admin-crud-btn {
+    flex: 1;
+  }
+
+  .admin-crud-searchbar {
+    gap: 8px;
+  }
+
+  .admin-crud-search-input-wrapper {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .admin-crud-badge {
+    width: 100%;
+    text-align: right;
+  }
+
+  .admin-crud-th, .admin-crud-td {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+
+  .admin-crud-modal {
+    padding: 20px;
+    max-height: 90vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-crud-container {
+    padding: 12px;
+  }
+
+  .admin-crud-header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .admin-crud-header-actions .admin-crud-btn {
+    width: 100%;
+  }
+
+  .admin-crud-btn-delete {
+    margin-left: 0;
+    margin-top: 6px;
+  }
+
+  /* Si las acciones en la tabla se amontonan, las alineamos en bloque */
+  .admin-crud-table td:last-child {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .admin-crud-btn-delete {
+    margin-left: 0;
+  }
+
+  .admin-crud-pagination {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .admin-crud-pagination-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+}

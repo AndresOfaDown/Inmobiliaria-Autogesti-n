@@ -1,0 +1,568 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   ModalRecorrido3D.css — Estilos premium para recorrido 360° en pantalla completa
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.modal-recorrido {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-color: #020617;
+  color: #f8fafc;
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Encabezado Flotante (Glassmorphic) ────────────────────────────── */
+.modal-recorrido__header {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 28px;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: modal-recorrido-slide-down 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-recorrido__header--hidden {
+  opacity: 0 !important;
+  transform: translateY(-50px) !important;
+  pointer-events: none !important;
+}
+
+.modal-recorrido__header-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.modal-recorrido__compass-box {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+  animation: modal-recorrido-pulse-glow 3s infinite alternate;
+}
+
+.modal-recorrido__compass-icon {
+  color: #ffffff;
+  animation: modal-recorrido-compass-rotate 20s linear infinite;
+}
+
+.modal-recorrido__badge {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+  border-radius: 20px;
+  margin-bottom: 4px;
+}
+
+.modal-recorrido__title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.modal-recorrido__room-desc {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 3px 0 0 0;
+}
+
+.modal-recorrido__room-desc strong {
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.modal-recorrido__close-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  color: #f1f5f9;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.modal-recorrido__close-btn:hover {
+  background: #ef4444;
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
+}
+
+/* ─── Pantalla de Carga Inmersiva ────────────────────────────── */
+.modal-recorrido__loader {
+  position: absolute;
+  inset: 0;
+  z-index: 2000;
+  background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-recorrido__loader-card {
+  width: 90%;
+  max-width: 440px;
+  padding: 40px;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal-recorrido__spinner {
+  width: 56px;
+  height: 56px;
+  border: 3.5px solid rgba(255, 255, 255, 0.05);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: modal-recorrido-spin 1s cubic-bezier(0.53, 0.21, 0.29, 0.67) infinite;
+  margin-bottom: 24px;
+}
+
+.modal-recorrido__loader-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #ffffff;
+}
+
+.modal-recorrido__loader-text {
+  font-size: 0.88rem;
+  color: #94a3b8;
+  margin: 0 0 24px 0;
+  height: 20px;
+}
+
+.modal-recorrido__progress-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.modal-recorrido__progress-bar-fg {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border-radius: 10px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+.modal-recorrido__percentage {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #a5b4fc;
+}
+
+/* ─── Contenedor del Visor 3D ────────────────────────────────── */
+.modal-recorrido__viewer {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  outline: none;
+}
+
+/* ─── Carrusel Inferior de Miniaturas (Glassmorphic) ─────────── */
+.modal-recorrido__carousel-container {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+  z-index: 1000;
+  padding: 16px 20px;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.4);
+  animation: modal-recorrido-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-recorrido__carousel-container--hidden {
+  opacity: 0 !important;
+  transform: translateY(50px) !important;
+  pointer-events: none !important;
+}
+
+.modal-recorrido__carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+
+.modal-recorrido__tip {
+  color: #38bdf8;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.modal-recorrido__carousel {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.modal-recorrido__carousel::-webkit-scrollbar {
+  height: 5px;
+}
+
+.modal-recorrido__carousel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+.modal-recorrido__thumb-card {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 130px;
+  text-align: left;
+  outline: none;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-recorrido__thumb-card:hover {
+  transform: translateY(-4px);
+}
+
+.modal-recorrido__thumb-img-wrapper {
+  position: relative;
+  height: 76px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: #1e293b;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.modal-recorrido__thumb-card:hover .modal-recorrido__thumb-img-wrapper {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.modal-recorrido__thumb-card--active .modal-recorrido__thumb-img-wrapper {
+  border-color: #6366f1;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+.modal-recorrido__thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.modal-recorrido__thumb-card:hover .modal-recorrido__thumb-img {
+  transform: scale(1.08);
+}
+
+.modal-recorrido__thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+.modal-recorrido__thumb-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 80%);
+  pointer-events: none;
+}
+
+.modal-recorrido__thumb-label {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-top: 6px;
+  padding: 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
+}
+
+.modal-recorrido__thumb-card:hover .modal-recorrido__thumb-label {
+  color: #ffffff;
+}
+
+.modal-recorrido__thumb-card--active .modal-recorrido__thumb-label {
+  color: #6366f1;
+  font-weight: 700;
+}
+
+/* ─── Pannellum Custom Stylings / Hotspots overrides ─────────── */
+.modal-recorrido__viewer .pnlm-container {
+  background-color: #020617 !important;
+}
+
+/* Ocultar la subimagen que Pannellum pone dentro de hotspots tipo 'scene' */
+.modal-recorrido__viewer .pnlm-scene {
+  background-image: none !important;
+  background-color: transparent !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+}
+
+/* Estilo simple, limpio y funcional de los hotspots creados en Pannellum */
+.modal-recorrido__viewer .pnlm-hotspot-base {
+  background-image: none !important;
+  background-color: rgba(15, 23, 42, 0.85) !important;
+  border: 2px solid #ffffff !important;
+  width: 32px !important;
+  height: 32px !important;
+  margin-left: -16px !important;
+  margin-top: -16px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  transition: all 0.25s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Pulsación sutil y minimalista en reposo */
+.modal-recorrido__viewer .pnlm-hotspot-base::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  animation: modal-recorrido-ping-pulse 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  pointer-events: none;
+}
+
+/* Ícono de flecha central sobrio (triángulo fino) */
+.modal-recorrido__viewer .pnlm-hotspot-base::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 4.5px solid transparent;
+  border-right: 4.5px solid transparent;
+  border-bottom: 7.5px solid #ffffff;
+  transform: translateY(-1px);
+  transition: transform 0.25s ease;
+}
+
+.modal-recorrido__viewer .pnlm-hotspot-base:hover {
+  background-color: #6366f1 !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.45) !important;
+}
+
+.modal-recorrido__viewer .pnlm-hotspot-base:hover::after {
+  transform: translateY(-2px);
+}
+
+/* Pannellum Tooltip Customizations */
+.modal-recorrido__viewer .pnlm-tooltip span {
+  background: rgba(15, 23, 42, 0.92) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  padding: 6px 12px !important;
+  border-radius: 8px !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+  top: -40px !important;
+}
+
+.modal-recorrido__viewer .pnlm-tooltip span::after {
+  border-top-color: rgba(15, 23, 42, 0.92) !important;
+}
+
+/* Etiqueta flotante permanente y minimalista debajo de los hotspots */
+.modal-recorrido__viewer .pnlm-custom-nav-label {
+  position: absolute;
+  top: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  pointer-events: auto; /* Modificado: Habilita el clic sobre el texto */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  letter-spacing: 0.04em;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+/* Hover suave y sobrio para la etiqueta */
+.modal-recorrido__viewer .pnlm-hotspot-base:hover .pnlm-custom-nav-label {
+  background: #6366f1 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 6px 14px rgba(99, 102, 241, 0.35) !important;
+  transform: translateX(-50%) translateY(-1px) !important;
+  color: #ffffff !important;
+}
+
+/* ─── Controles Flotantes Inmersivos ─────────────────────────── */
+/* ─── Botones de Control Mínimos (Top Overlays) ──────────────── */
+.modal-recorrido__top-center {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  pointer-events: auto;
+}
+
+.modal-recorrido__top-right {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2000;
+  pointer-events: auto;
+}
+
+.modal-recorrido__vr-btn-minimal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: #0284c7; /* Sky blue primary color */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 30px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(2, 132, 199, 0.5);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-recorrido__vr-btn-minimal:hover {
+  background: #0369a1;
+  transform: scale(1.05);
+  box-shadow: 0 6px 22px rgba(2, 132, 199, 0.7);
+}
+
+.modal-recorrido__close-btn-minimal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-recorrido__close-btn-minimal:hover {
+  background: #ef4444;
+  border-color: transparent;
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+/* ─── Animaciones ────────────────────────────────────────────── */
+@keyframes modal-recorrido-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes modal-recorrido-ping-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .modal-recorrido__top-center {
+    top: 12px;
+  }
+  .modal-recorrido__top-right {
+    top: 12px;
+    right: 12px;
+  }
+  .modal-recorrido__vr-btn-minimal {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    border-radius: 20px;
+    width: auto;
+    height: auto;
+  }
+  .modal-recorrido__vr-btn-minimal span {
+    display: inline;
+  }
+}

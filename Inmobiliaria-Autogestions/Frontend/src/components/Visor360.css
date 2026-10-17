@@ -1,0 +1,451 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Visor360 — Estilos del componente de exploración inmersiva 360°
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.visor360 {
+  margin-bottom: 32px;
+}
+
+/* ─── Encabezado de sección ──────────────────────────────────────────── */
+.visor360__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.visor360__header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.visor360__header h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.visor360__header p {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: 2px 0 0 0;
+}
+
+/* ─── Selector de pisos (pills) ──────────────────────────────────────── */
+.visor360__pisos {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 6px;
+  background: rgba(99, 102, 241, 0.04);
+  border: 1px solid rgba(99, 102, 241, 0.12);
+  border-radius: 14px;
+  overflow-x: auto;
+}
+
+.visor360__piso-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.visor360__piso-btn:hover {
+  background: rgba(99, 102, 241, 0.08);
+  color: #6366f1;
+}
+
+.visor360__piso-btn--active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  transform: translateY(-1px);
+}
+
+.visor360__piso-btn--active:hover {
+  background: linear-gradient(135deg, #5558e6, #7c4fe0);
+  color: #fff;
+}
+
+/* ─── Tabs de habitaciones ───────────────────────────────────────────── */
+.visor360__tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 4px;
+  background: var(--color-bg);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+.visor360__tab {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.visor360__tab:hover {
+  background: rgba(99, 102, 241, 0.06);
+  color: var(--color-text);
+}
+
+.visor360__tab--active {
+  background: #fff;
+  color: #6366f1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.visor360__tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background: #6366f1;
+  border-radius: 3px;
+}
+
+/* ─── Contenedor del visor ───────────────────────────────────────────── */
+.visor360__viewer-wrapper {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  background: #0f172a;
+}
+
+.visor360__viewer {
+  width: 100%;
+  height: 450px;
+}
+
+/* ─── Overlay de carga ───────────────────────────────────────────────── */
+.visor360__loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  color: #fff;
+  gap: 16px;
+  transition: opacity 0.4s ease;
+}
+
+.visor360__loading--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.visor360__spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: visor360-spin 0.8s linear infinite;
+}
+
+@keyframes visor360-spin {
+  to { transform: rotate(360deg); }
+}
+
+.visor360__loading-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ─── Barra inferior con controles ───────────────────────────────────── */
+.visor360__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.7));
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+}
+
+.visor360__scene-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.visor360__scene-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(139, 92, 246, 0.3);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #c4b5fd;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.visor360__fullscreen-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.visor360__fullscreen-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+  transform: scale(1.03);
+}
+
+/* ─── Estado vacío ───────────────────────────────────────────────────── */
+.visor360__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: var(--color-bg);
+  border-radius: 16px;
+  border: 1px dashed var(--color-border);
+  text-align: center;
+}
+
+.visor360__empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.08);
+  color: #6366f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.visor360__empty h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 8px;
+}
+
+.visor360__empty p {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: 0;
+  max-width: 380px;
+}
+
+/* ─── Pannellum overrides para consistencia visual ───────────────────── */
+.visor360__viewer .pnlm-container {
+  border-radius: 16px;
+}
+
+.visor360__viewer .pnlm-controls-container {
+  top: 12px !important;
+  right: 12px !important;
+}
+
+.visor360__viewer .pnlm-zoom-controls,
+.visor360__viewer .pnlm-fullwindow-toggle {
+  background: rgba(15, 23, 42, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+}
+
+.visor360__viewer .pnlm-zoom-in,
+.visor360__viewer .pnlm-zoom-out {
+  background: transparent !important;
+  color: #fff !important;
+  width: 36px !important;
+  height: 36px !important;
+}
+
+.visor360__viewer .pnlm-zoom-in:hover,
+.visor360__viewer .pnlm-zoom-out:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .visor360__viewer {
+    height: 300px;
+  }
+
+  .visor360__pisos {
+    gap: 6px;
+    padding: 4px;
+  }
+
+  .visor360__piso-btn {
+    padding: 6px 14px;
+    font-size: 0.78rem;
+  }
+
+  .visor360__tabs {
+    gap: 4px;
+  }
+
+  .visor360__tab {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+  }
+
+  .visor360__controls {
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+}
+
+/* ─── Botón premium de inicio de recorrido ──────────────────────────── */
+.visor360__start-tour-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.visor360__start-tour-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+  background: linear-gradient(135deg, #5558e6, #7c4fe0);
+}
+
+.visor360__start-tour-btn:active {
+  transform: translateY(0);
+}
+
+.visor360__start-tour-icon {
+  animation: visor360-compass-wiggle 3s ease-in-out infinite;
+}
+
+@keyframes visor360-compass-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(15deg); }
+}
+
+@media (max-width: 600px) {
+  .visor360__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  
+  .visor360__start-tour-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ─── Pantalla Completa (:fullscreen) ────────────────────────────────── */
+.visor360__viewer-wrapper:fullscreen,
+.visor360__viewer-wrapper:-webkit-full-screen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  background: #020617 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.visor360__viewer-wrapper:fullscreen .visor360__viewer,
+.visor360__viewer-wrapper:-webkit-full-screen .visor360__viewer {
+  height: 100% !important;
+  width: 100% !important;
+  flex: 1 !important;
+  border-radius: 0 !important;
+}
+
+.visor360__viewer-wrapper:fullscreen .visor360__viewer .pnlm-container,
+.visor360__viewer-wrapper:-webkit-full-screen .visor360__viewer .pnlm-container {
+  border-radius: 0 !important;
+}
+
+.visor360__viewer-wrapper:fullscreen .visor360__controls,
+.visor360__viewer-wrapper:-webkit-full-screen .visor360__controls {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+  padding: 14px 20px !important;
+}
+

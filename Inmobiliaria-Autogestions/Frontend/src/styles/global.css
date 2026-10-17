@@ -1,0 +1,218 @@
+/* ─── Estilos Globales ───────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import './variables.css';
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+  max-width: 100vw;
+}
+
+a {
+  color: var(--color-primary-light);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--color-text);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+}
+
+/* ─── Scrollbar personalizado ──────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ─── Utilidades de Layout ─────────────────────────────────── */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(12px, 4vw, var(--spacing-lg));
+  width: 100%;
+}
+
+/* Contenedor estándar de página con padding responsivo */
+.page-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(16px, 3vw, 32px) clamp(12px, 3vw, 24px);
+  width: 100%;
+}
+
+/* Header de sección con título + acciones */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: clamp(20px, 3vw, 32px);
+  flex-wrap: wrap;
+}
+
+.page-header__title {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.page-header__subtitle {
+  color: var(--color-text-muted);
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
+  margin-top: 4px;
+}
+
+/* ─── Tabla responsiva ────────────────────────────────────── */
+.responsive-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  width: 100%;
+}
+
+.responsive-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 500px;
+  font-size: 0.875rem;
+}
+
+.responsive-table-wrap th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.responsive-table-wrap td {
+  padding: 10px 14px;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.responsive-table-wrap tr:last-child td {
+  border-bottom: none;
+}
+
+/* ─── Card estándar ───────────────────────────────────────── */
+.card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: clamp(16px, 3vw, 24px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Grid de estadísticas responsiva ────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 20vw, 200px), 1fr));
+  gap: clamp(12px, 2vw, 16px);
+}
+
+/* ─── Flex row → columna en móvil ────────────────────────── */
+.flex-row-mobile-col {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .flex-row-mobile-col {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* ─── Visibilidad por breakpoint ─────────────────────────── */
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+}
+@media (min-width: 769px) {
+  .mobile-only { display: none !important; }
+}
+
+/* ─── Misc ─────────────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

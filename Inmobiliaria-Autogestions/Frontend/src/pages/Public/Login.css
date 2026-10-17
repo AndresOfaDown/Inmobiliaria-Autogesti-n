@@ -1,0 +1,48 @@
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.login__error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--color-danger);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.login__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.login__label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.login__input {
+  width: 100%;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.login__input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+  outline: none;
+}
+
+.login__input::placeholder {
+  color: var(--color-text-muted);
+}
