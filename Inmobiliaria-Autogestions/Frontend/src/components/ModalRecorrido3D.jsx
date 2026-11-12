@@ -64,18 +64,23 @@ const ModalRecorrido3D = ({ panoramas = [], onClose, musica = null }) => {
         setLoadingText(`Cargando ${pano.descripcion || `Habitación ${i + 1}`}...`);
         setLoadingProgress(Math.round((i / panoramas.length) * 100));
 
+        let fileSrc = pano.archivo || '';
+        if (fileSrc.startsWith('http://localhost:3000/uploads/')) {
+          fileSrc = fileSrc.replace('http://localhost:3000', '');
+        }
+
         try {
-          const response = await fetch(pano.archivo, { cache: 'force-cache', mode: 'cors' });
+          const response = await fetch(fileSrc, { cache: 'force-cache' });
           if (response.ok) {
             const blob = await response.blob();
             urls[pano.id] = URL.createObjectURL(blob);
           } else {
-            // Fallback: URL directa — Pannellum la carga nativamente
-            urls[pano.id] = pano.archivo;
+            // Fallback: URL relativa directa
+            urls[pano.id] = fileSrc;
           }
         } catch {
           // Fallback: URL directa sin fetch
-          urls[pano.id] = pano.archivo;
+          urls[pano.id] = fileSrc;
         }
       }
 

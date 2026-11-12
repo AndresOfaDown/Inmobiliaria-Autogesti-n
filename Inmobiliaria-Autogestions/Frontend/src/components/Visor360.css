@@ -449,3 +449,52 @@
   padding: 14px 20px !important;
 }
 
+/* ─── Puntos de Enlace Interactivos (Hotspots tipo Google Street View) ─── */
+.visor360__viewer .pnlm-hotspot-base {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: rgba(99, 102, 241, 0.9) !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.8), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  animation: visor360-hotspot-pulse 2s infinite alternate !important;
+}
+
+.visor360__viewer .pnlm-hotspot-base:hover {
+  transform: scale(1.25) translateY(-4px) !important;
+  background: #4f46e5 !important;
+  box-shadow: 0 0 28px rgba(99, 102, 241, 1), 0 8px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+.visor360__viewer .pnlm-hotspot-base::after {
+  content: '➔';
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+  display: block;
+}
+
+@keyframes visor360-hotspot-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 12px rgba(99, 102, 241, 0.6); }
+  100% { transform: scale(1.12); box-shadow: 0 0 24px rgba(99, 102, 241, 0.95); }
+}
+
+.visor360__viewer .pnlm-tooltip span {
+  background: rgba(15, 23, 42, 0.95) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #f8fafc !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+}
+

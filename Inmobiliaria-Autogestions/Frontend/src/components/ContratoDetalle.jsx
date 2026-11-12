@@ -249,79 +249,159 @@ const ContratoDetalle = ({ contrato: c, user, onUpdate }) => {
   };
 
   const cfg = estadoConfig[c.estado] || estadoConfig.pendiente;
+  const CfgIcon = cfg.icon || CheckCircle;
   const sectionStyle = { marginBottom: '20px' };
   const titleStyle = { fontSize: '0.8rem', fontWeight: 700, color: '#6366f1', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' };
   const rowStyle = { display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #f1f5f9', fontSize: '0.9rem' };
   const labelStyle = { color: '#64748b', fontWeight: 500 };
   const valueStyle = { fontWeight: 600, color: '#1e293b', textAlign: 'right', maxWidth: '60%' };
 
+  const formatearFecha = (val) => {
+    if (!val || val === 'Invalid Date') return 'Reciente';
+    try {
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return 'Reciente';
+      return d.toLocaleDateString('es-BO', { day: '2-digit', month: 'short', year: 'numeric' });
+    } catch {
+      return 'Reciente';
+    }
+  };
+
   return (
-    <div style={{ maxHeight: '80vh', display: 'flex', flexDirection: 'column', gap: '15px', padding: '4px' }}>
-      {/* Header */}
-      <div style={{ textAlign: 'center', padding: '16px', background: 'linear-gradient(135deg, #f8fafc, #e0e7ff)', borderRadius: '12px', flexShrink: 0 }}>
-        <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#1e293b' }}>CONTRATO DE {(c.tipo_contrato_nombre || 'INMUEBLE').toUpperCase()}</div>
-        <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '4px' }}>Contrato N. {c.id} · Creado: {new Date(c.creado).toLocaleDateString('es-BO')}</div>
-        <span style={{ display: 'inline-block', marginTop: '8px', background: cfg.bg, color: cfg.color, padding: '4px 14px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 700 }}>{cfg.label}</span>
+    <div style={{ maxHeight: '82vh', display: 'flex', flexDirection: 'column', gap: '10px', padding: '2px' }}>
+      {/* Header Compacto */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '8px 14px',
+        background: 'linear-gradient(135deg, #f8fafc, #eff6ff)',
+        borderRadius: '10px',
+        border: '1px solid #e2e8f0',
+        flexShrink: 0,
+        gap: '10px',
+        flexWrap: 'wrap'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{
+            width: '28px',
+            height: '28px',
+            borderRadius: '6px',
+            background: '#6366f1',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <FileText size={15} color="#fff" />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1e293b', lineHeight: 1.2 }}>
+              CONTRATO DE {(c.tipo_contrato_nombre || 'INMUEBLE').toUpperCase()}
+            </div>
+            <div style={{ fontSize: '0.74rem', color: '#64748b', marginTop: '1px' }}>
+              Contrato #{c.id} · Emitido: {formatearFecha(c.createdAt || c.creado || c.inicio)}
+            </div>
+          </div>
+        </div>
+
+        <span style={{
+          background: cfg.bg,
+          color: cfg.color,
+          padding: '3px 10px',
+          borderRadius: '10px',
+          fontSize: '0.74rem',
+          fontWeight: 700,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '4px',
+          border: `1px solid ${cfg.color}33`
+        }}>
+          <CfgIcon size={12} /> {cfg.label}
+        </span>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid #e2e8f0', paddingBottom: '2px', flexShrink: 0 }}>
+      {/* Tabs Compactos */}
+      <div style={{ display: 'flex', gap: '4px', borderBottom: '2px solid #e2e8f0', paddingBottom: '2px', flexShrink: 0, overflowX: 'auto' }}>
         <button
           onClick={() => setActiveTab('resumen')}
           style={{
-            padding: '8px 16px',
+            padding: '6px 12px',
             background: 'none',
             border: 'none',
             borderBottom: activeTab === 'resumen' ? '3px solid #6366f1' : '3px solid transparent',
             color: activeTab === 'resumen' ? '#6366f1' : '#64748b',
             fontWeight: 700,
-            fontSize: '0.88rem',
+            fontSize: '0.82rem',
             cursor: 'pointer',
             transition: 'all 0.15s',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '6px',
+            gap: '5px',
+            whiteSpace: 'nowrap'
           }}
         >
-          <ClipboardList size={16} /> Resumen y Firmas
+          <ClipboardList size={14} /> Resumen y Firmas
         </button>
         <button
           onClick={() => setActiveTab('chat')}
           style={{
-            padding: '8px 16px',
+            padding: '6px 12px',
             background: 'none',
             border: 'none',
             borderBottom: activeTab === 'chat' ? '3px solid #8b5cf6' : '3px solid transparent',
             color: activeTab === 'chat' ? '#8b5cf6' : '#64748b',
             fontWeight: 700,
-            fontSize: '0.88rem',
+            fontSize: '0.82rem',
             cursor: 'pointer',
             transition: 'all 0.15s',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '6px',
+            gap: '5px',
+            whiteSpace: 'nowrap'
           }}
         >
-          <MessageSquare size={16} /> Abogado Virtual
+          <MessageSquare size={14} /> Abogado Virtual
         </button>
         <button
           onClick={() => setActiveTab('pdf')}
           style={{
-            padding: '8px 16px',
+            padding: '6px 12px',
             background: 'none',
             border: 'none',
             borderBottom: activeTab === 'pdf' ? '3px solid #059669' : '3px solid transparent',
             color: activeTab === 'pdf' ? '#059669' : '#64748b',
             fontWeight: 700,
-            fontSize: '0.88rem',
+            fontSize: '0.82rem',
             cursor: 'pointer',
             transition: 'all 0.15s',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '6px',
+            gap: '5px',
+            whiteSpace: 'nowrap'
           }}
         >
-          <Printer size={16} /> Vista de Impresión (PDF)
+          <Printer size={14} /> Vista de Impresión (PDF)
+        </button>
+        <button
+          onClick={() => setActiveTab('blockchain')}
+          style={{
+            padding: '6px 12px',
+            background: 'none',
+            border: 'none',
+            borderBottom: activeTab === 'blockchain' ? '3px solid #0284c7' : '3px solid transparent',
+            color: activeTab === 'blockchain' ? '#0284c7' : '#64748b',
+            fontWeight: 700,
+            fontSize: '0.82rem',
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <ShieldCheck size={14} /> Auditoría Blockchain
         </button>
       </div>
 
@@ -718,6 +798,43 @@ const ContratoDetalle = ({ contrato: c, user, onUpdate }) => {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'blockchain' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)',
+              borderRadius: '12px',
+              padding: '16px',
+              border: '1px solid #bae6fd',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                background: '#0284c7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <ShieldCheck size={22} color="#fff" />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0369a1' }}>
+                  Smart Contract y Trazabilidad Inmutable
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#0284c7' }}>
+                  Identificador Criptográfico: <strong>{c.smart_contract_id || `CON-${c.id}`}</strong> · Red: Hyperledger Fabric v2.5 (Raft BFT)
+                </div>
+              </div>
+            </div>
+
+            <BlockchainAuditTrail assetId={c.smart_contract_id || `CON-${c.id}`} />
           </div>
         )}
       </div>

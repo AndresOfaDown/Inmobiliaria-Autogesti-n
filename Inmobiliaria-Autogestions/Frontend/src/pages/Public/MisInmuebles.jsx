@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Check, X, Clock, Trash2, Tag, Megaphone, Plus, Calendar, AlertCircle, ShieldCheck, ShieldAlert, FileText, UploadCloud, RefreshCw, Settings, ChevronDown, ChevronUp, Eye, EyeOff, Edit3 } from 'lucide-react';
+import { MapPin, Check, X, Clock, Trash2, Tag, Megaphone, Plus, Calendar, AlertCircle, ShieldCheck, ShieldAlert, FileText, UploadCloud, RefreshCw, Settings, ChevronDown, ChevronUp, Eye, EyeOff, Edit3, Cpu } from 'lucide-react';
 import tituloService from '../../services/tituloService';
 import BlockchainAuditTrail from '../../components/BlockchainAuditTrail';
 import useAlertConfirm from '../../hooks/useAlertConfirm';
@@ -10,6 +10,8 @@ import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import imageCompression from 'browser-image-compression';
+import ModalGestionIoT from '../../components/ModalGestionIoT';
+import Modal from '../../components/Modal';
 
 // Configurar marker por defecto de Leaflet
 let DefaultIcon = L.icon({
@@ -61,6 +63,8 @@ const MisInmuebles = () => {
   const [guiaPasoActivo, setGuiaPasoActivo] = useState(1);
   const [showEditorRecorrido, setShowEditorRecorrido] = useState(false);
   const [editorInmueble, setEditorInmueble] = useState(null);
+  const [showIotModal, setShowIotModal] = useState(false);
+  const [iotInmueble, setIotInmueble] = useState(null);
 
   const [formData, setFormData] = useState({
     titulo: '',
@@ -335,9 +339,9 @@ const MisInmuebles = () => {
         const relacion = ancho / alto;
 
         // El estándar equirectangular 360° perfecto es 2:1.
-        // Se ha flexibilizado enormemente el rango (de 1.2 a 5.0) para permitir panorámicas 
-        // extremadamente largas capturadas por smartphones sin apps de Photo Sphere.
-        if (relacion >= 1.2 && relacion <= 5.0) {
+        // Se amplía el rango (de 1.1 a 12.0) para permitir fotos panorámicas continuas
+        // y ultra-anchas tomadas con modo "PANO / Panorámica" de cualquier celular o enviadas por WhatsApp.
+        if (relacion >= 1.1 && relacion <= 12.0) {
           resolve({ valido: true, relacion, ancho, alto });
         } else {
           resolve({ valido: false, relacion, ancho, alto });
@@ -768,7 +772,7 @@ const MisInmuebles = () => {
                         <span className="propiedad-card__badge" style={{ background: estadoStyle.bg, color: estadoStyle.color, position: 'static' }}>
                           {inm.estado}
                         </span>
-                        {inm.verificacion_estado && (
+                        {inm.verificacion_estado && inm.verificacion_estado !== 'no_solicitado' && (
                           <span
                             className="propiedad-card__badge"
                             style={{
@@ -910,6 +914,19 @@ const MisInmuebles = () => {
                                 <path d="M2 12h20" />
                               </svg>
                               <span>Recorrido 3D y Hotspots (IA)</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIotInmueble(inm);
+                                setShowIotModal(true);
+                              }}
+                              className="propiedad-card__admin-btn"
+                              style={{ color: '#0284c7' }}
+                            >
+                              <Cpu size={16} />
+                              <span>Cerraduras y Dispositivos IoT</span>
                             </button>
 
                             <button
@@ -2365,6 +2382,27 @@ const MisInmuebles = () => {
           }}
         />
       )}
+
+      {showIotModal && iotInmueble && (
+        <Modal
+          isOpen={showIotModal}
+          onClose={() => {
+            setShowIotModal(false);
+            setIotInmueble(null);
+          }}
+          title="Gestión de Dispositivos y Cerraduras IoT"
+          size="lg"
+        >
+          <ModalGestionIoT
+            inmueble={iotInmueble}
+            onClose={() => {
+              setShowIotModal(false);
+              setIotInmueble(null);
+            }}
+          />
+        </Modal>
+      )}
+
       {ModalComponent}
     </div>
   );

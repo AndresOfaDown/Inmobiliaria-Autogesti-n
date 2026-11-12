@@ -6,6 +6,9 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { InmueblesModule } from './inmuebles/inmuebles.module';
+import { PagosModule } from './pagos/pagos.module';
+import { ContratosModule } from './contratos/contratos.module';
+import { IotModule } from './iot/iot.module';
 
 @Module({
   imports: [
@@ -14,6 +17,9 @@ import { InmueblesModule } from './inmuebles/inmuebles.module';
     AuthModule,
     UsuariosModule,
     InmueblesModule,
+    PagosModule,
+    ContratosModule,
+    IotModule,
   ],
   controllers: [AppController],
   providers: [AppService],

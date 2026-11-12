@@ -187,6 +187,34 @@ export class InmueblesController {
     return this.inmueblesService.deleteMultimedia(id, req.user);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Patch('multimedia/:id')
+  actualizarMultimedia(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: any,
+    @Request() req: any,
+  ) {
+    return this.inmueblesService.actualizarMultimedia(id, dto, req.user);
+  }
+
+  // ─── HOTSPOTS INTERACTIVOS 360 ────────────────────────────────────
+  @Get('hotspots')
+  listarHotspots(@Query('inmueble', ParseIntPipe) inmuebleId: number) {
+    return this.inmueblesService.listarHotspots(inmuebleId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('hotspots')
+  crearHotspot(@Body() dto: any, @Request() req: any) {
+    return this.inmueblesService.crearHotspot(dto, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('hotspots/:id')
+  eliminarHotspot(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
+    return this.inmueblesService.eliminarHotspot(id, req.user);
+  }
+
   // ─── PUBLICACIONES DE INMUEBLE (Ofertas de Alquiler / Venta) ─────
   @UseGuards(JwtAuthGuard)
   @Get('panel/publicaciones')
@@ -253,5 +281,58 @@ export class InmueblesController {
   @Get('accesos-360/check')
   checkAcceso360(@Query('inmueble_id', ParseIntPipe) inmuebleId: number, @Request() req: any) {
     return this.inmueblesService.checkAcceso360(inmuebleId, req.user);
+  }
+
+  // ─── HU-22 VERIFICACIÓN LEGAL CON IA (OCR + NLP) ──────────────────
+  @UseGuards(JwtAuthGuard)
+  @Post(['verificacion', 'verificacion/'])
+  @UseInterceptors(
+    FileInterceptor('archivo', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const dest = join(process.cwd(), 'uploads', 'documentos');
+          const fs = require('fs');
+          if (!fs.existsSync(dest)) {
+            fs.mkdirSync(dest, { recursive: true });
+          }
+          cb(null, dest);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          cb(null, `titulo-${uniqueSuffix}${ext}`);
+        },
+      }),
+      limits: {
+        fileSize: 15 * 1024 * 1024, // 15MB máximo
+      },
+    }),
+  )
+  subirYVerificarTitulo(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('inmueble') inmuebleId: any,
+    @Request() req: any,
+  ) {
+    return this.inmueblesService.verificarTitulo(Number(inmuebleId), file, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(['verificacion/resultado/:inmuebleId', 'verificacion/resultado/:inmuebleId/'])
+  getResultadoVerificacion(
+    @Param('inmuebleId', ParseIntPipe) inmuebleId: number,
+    @Request() req: any,
+  ) {
+    return this.inmueblesService.getResultadoVerificacion(inmuebleId, req.user);
+  }
+
+  // ─── BLOCKCHAIN AUDIT TRAIL & STATS ──────────────────────────────
+  @Get(['blockchain/historial/:assetId', 'blockchain/historial/:assetId/'])
+  getBlockchainHistorial(@Param('assetId') assetId: string) {
+    return this.inmueblesService.getBlockchainHistorial(assetId);
+  }
+
+  @Get(['blockchain/stats', 'blockchain/stats/'])
+  getBlockchainStats() {
+    return this.inmueblesService.getBlockchainStats();
   }
 }

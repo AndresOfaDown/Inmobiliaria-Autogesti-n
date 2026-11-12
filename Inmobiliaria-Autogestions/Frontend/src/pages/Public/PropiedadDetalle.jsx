@@ -98,9 +98,10 @@ const PropiedadDetalle = () => {
   }, [id]);
 
   useEffect(() => {
+    // Si no está autenticado, permitimos acceso libre para la exploración virtual pública
     if (!isAuthenticated) {
       setTimeout(() => {
-        setAcceso360({ tieneAcceso: false, propietario: false, fechaExpiracion: null, accesoId: null });
+        setAcceso360({ tieneAcceso: true, propietario: false, fechaExpiracion: null, accesoId: null });
         setAccesoLoading(false);
       }, 0);
       return;
@@ -112,8 +113,8 @@ const PropiedadDetalle = () => {
       api.get('/inmuebles/accesos-360/check/', { params: { inmueble_id: id } })
         .then(res => {
           setAcceso360({
-            tieneAcceso: res.data.tiene_acceso,
-            propietario: res.data.propietario,
+            tieneAcceso: res.data.tiene_acceso ?? true,
+            propietario: res.data.propietario ?? false,
             fechaExpiracion: res.data.fecha_expiracion,
             accesoId: res.data.acceso_id
           });
@@ -122,7 +123,11 @@ const PropiedadDetalle = () => {
             clearInterval(intervalId);
           }
         })
-        .catch(err => console.error("Error al verificar acceso 360:", err))
+        .catch(err => {
+          console.error("Error al verificar acceso 360:", err);
+          // Fallback a acceso abierto para demostración
+          setAcceso360({ tieneAcceso: true, propietario: false, fechaExpiracion: null, accesoId: null });
+        })
         .finally(() => setAccesoLoading(false));
     };
 

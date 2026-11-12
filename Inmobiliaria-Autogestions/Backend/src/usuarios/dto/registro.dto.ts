@@ -25,8 +25,9 @@ export class RegistroDto {
   @IsString()
   ci?: string;
 
-  @IsOptional()
-  fecha_nacimiento?: string;
+  @IsNotEmpty({ message: 'La fecha de nacimiento es obligatoria' })
+  @IsString({ message: 'La fecha de nacimiento debe ser una cadena válida' })
+  fecha_nacimiento: string;
 
   @IsOptional()
   @IsString()

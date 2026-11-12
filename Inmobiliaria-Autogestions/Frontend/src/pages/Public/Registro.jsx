@@ -6,6 +6,12 @@ import './Login.css';
 
 const Registro = () => {
   const navigate = useNavigate();
+
+  // Calcular la fecha límite exacta para tener al menos 18 años
+  const today = new Date();
+  const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+  const maxBirthDate = `${maxDate.getFullYear()}-${String(maxDate.getMonth() + 1).padStart(2, '0')}-${String(maxDate.getDate()).padStart(2, '0')}`;
+
   const [formData, setFormData] = useState({
     email: '',
     first_name: '',
@@ -32,12 +38,19 @@ const Registro = () => {
     setSuccess('');
     setLoading(true);
 
-    // Validación mayores de 18 años
+    // Validación obligatoria y de mayoría de edad (mínimo 18 años)
+    if (!formData.fecha_nacimiento) {
+      setError('La fecha de nacimiento es obligatoria.');
+      setLoading(false);
+      return;
+    }
+
     const today = new Date();
-    const minBirthDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split('T')[0];
-    
-    if (formData.fecha_nacimiento && formData.fecha_nacimiento > minBirthDate) {
-      setError('Debes ser mayor de 18 años para poder registrarte.');
+    const cutoffDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+    const birthDate = new Date(formData.fecha_nacimiento + 'T00:00:00');
+
+    if (birthDate > cutoffDate) {
+      setError('Debes ser mayor o igual de 18 años para poder registrarte.');
       setLoading(false);
       return;
     }
@@ -52,7 +65,12 @@ const Registro = () => {
       }, 2000);
       
     } catch (err) {
-      setError('Error al registrar. Verifica los datos o intenta con otro usuario.');
+      const backendMsg = err.response?.data?.message;
+      if (backendMsg) {
+        setError(Array.isArray(backendMsg) ? backendMsg.join(', ') : backendMsg);
+      } else {
+        setError('Error al registrar. Verifica los datos o intenta con otro correo.');
+      }
       console.error(err);
     } finally {
       setLoading(false);
@@ -104,14 +122,16 @@ const Registro = () => {
         </div>
 
         <div className="login__field">
-          <label htmlFor="fecha_nacimiento" className="login__label">Fecha de Nacimiento</label>
+          <label htmlFor="fecha_nacimiento" className="login__label">
+            Fecha de Nacimiento <span style={{ color: '#ef4444' }}>*</span> (Mayor o igual a 18 años)
+          </label>
           <input 
             id="fecha_nacimiento" 
             type="date" 
             className="login__input" 
             value={formData.fecha_nacimiento} 
             onChange={handleChange} 
-            max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+            max={maxBirthDate}
             style={{ colorScheme: 'dark' }} 
             required
           />

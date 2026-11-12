@@ -38,6 +38,13 @@ const TX_MAP = {
     bg: '#fffbeb',
     icon: Clock,
     desc: 'Recibo y comprobante de pago de alquiler/garantía registrado para auditoría histórica.'
+  },
+  rechazoVerificacion: {
+    label: 'Auditoría: Título Rechazado',
+    color: '#dc2626',
+    bg: '#fef2f2',
+    icon: HelpCircle,
+    desc: 'El archivo presentado no superó la verificación criptográfica ni el análisis de Derechos Reales.'
   }
 };
 
@@ -104,8 +111,10 @@ const BlockchainAuditTrail = ({ assetId }) => {
   };
 
   const formatKeyName = (key) => {
+    if (!key) return 'Detalle';
     // Convert camelCase to human readable title Case
-    const result = key.replace(/([A-Z])/g, ' $1');
+    const str = String(key);
+    const result = str.replace(/([A-Z])/g, ' $1');
     return result.charAt(0).toUpperCase() + result.slice(1);
   };
 
@@ -161,19 +170,20 @@ const BlockchainAuditTrail = ({ assetId }) => {
 
       {/* Timeline descentralizada */}
       <div className="blockchain-timeline">
-        {history.map((node) => {
-          const txConfig = TX_MAP[node.txName] || {
-            label: formatKeyName(node.txName),
+        {history.map((node, index) => {
+          const txKey = node.txName || node.txType || 'operacion';
+          const txConfig = TX_MAP[txKey] || {
+            label: formatKeyName(txKey),
             color: '#475569',
             bg: '#f1f5f9',
             icon: Database,
             desc: 'Operación del sistema consolidada en el ledger de bloques.'
           };
           const IconComp = txConfig.icon;
-          const isExpanded = expandedBlock === node.blockNumber;
+          const isExpanded = expandedBlock === (node.blockNumber ?? index);
 
           return (
-            <div key={node.blockNumber} className="blockchain-node">
+            <div key={node.blockNumber ?? index} className="blockchain-node">
               {/* Dot marcador */}
               <div 
                 className="blockchain-node__dot" 

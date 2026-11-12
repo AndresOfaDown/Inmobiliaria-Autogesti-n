@@ -22,6 +22,7 @@ import PagoExitoso from './pages/Public/PagoExitoso';
 import PagoCancelado from './pages/Public/PagoCancelado';
 import MisContratos from './pages/Public/MisContratos';
 import MisPagos from './pages/Public/MisPagos';
+import MisLlaves from './pages/Public/MisLlaves';
 import TestConexion from './pages/Public/TestConexion';
 
 // Pages - Admin
@@ -89,6 +90,10 @@ const router = createBrowserRouter([
           {
             path: '/mis-contratos',
             element: <MisContratos />,
+          },
+          {
+            path: '/mis-llaves',
+            element: <MisLlaves />,
           },
           {
             path: '/mis-pagos',

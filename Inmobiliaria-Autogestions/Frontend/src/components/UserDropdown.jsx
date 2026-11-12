@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Sun, Moon, Monitor, KeyRound } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import ProfileModal from './ProfileModal';
 import useStore from '../store/store';
@@ -86,6 +87,13 @@ const UserDropdown = () => {
                   </svg>
                   Mi Perfil
                 </button>
+              </li>
+
+              <li className="user-dropdown__item">
+                <Link to="/mis-llaves" className="user-dropdown__btn" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none' }}>
+                  <KeyRound size={16} className="user-dropdown__icon" color="#0284c7" />
+                  Mis Llaves IoT
+                </Link>
               </li>
 
               <li className="user-dropdown__item">

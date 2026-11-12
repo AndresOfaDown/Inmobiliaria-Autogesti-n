@@ -110,7 +110,7 @@ const MisContratos = () => {
       </div>
 
       {/* Modal de detalle del contrato */}
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Detalle del Contrato">
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Detalle del Contrato" size="lg">
         {selectedContrato && (
           <ContratoDetalle 
             contrato={selectedContrato} 

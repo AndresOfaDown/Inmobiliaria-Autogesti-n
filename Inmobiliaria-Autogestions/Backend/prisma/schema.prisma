@@ -37,6 +37,31 @@ model Usuario {
   // Relación con inmuebles
   inmuebles        Inmueble[]
 
+  // Relación con notificaciones
+  notificaciones   Notificacion[]
+
+  // Relación con reseñas
+  resenas          Resena[]
+
+  // Relación con pagos
+  pagos_realizados Pago[]     @relation("PagosInquilino")
+  pagos_recibidos  Pago[]     @relation("PagosPropietario")
+
+  // Relación con contratos
+  contratos_propietario Contrato[] @relation("ContratosPropietario")
+  contratos_inquilino   Contrato[] @relation("ContratosInquilino")
+
+  // Relación con IoT
+  reglas_acceso_iot      ReglaAccesoIoT[]
+  historial_acciones_iot HistorialAccionIoT[]
+
+  // Relación con Chats y Mensajes
+  chats_participante1    Chat[]           @relation("ChatsParticipante1")
+  chats_participante2    Chat[]           @relation("ChatsParticipante2")
+  mensajes_enviados      Mensaje[]        @relation("MensajesRemitente")
+  bloqueos_realizados    BloqueoUsuario[] @relation("UsuarioBloqueador")
+  bloqueos_recibidos     BloqueoUsuario[] @relation("UsuarioBloqueado")
+
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 
@@ -85,14 +110,310 @@ model Inmueble {
   estado              String       @default("disponible")
   gps                 String?
   verificacion_estado String       @default("no_solicitado")
+  verificacion_datos  Json?        @default("{}") // { score_confianza, resumen_publico, resultado_ia, archivo_url, creado }
 
   imagen_principal    String?
   multimedia          Json?        @default("[]") // [{ id, tipo, archivo, principal, descripcion, orden }]
   publicaciones       Json?        @default("[]") // [{ id, tipo_oferta, precio, estado }]
   horarios            Json?        @default("[]") // [{ id, dia_semana, hora_inicio, hora_fin, activo }]
 
+  // Relación con reseñas
+  resenas             Resena[]
+
+  // Relación con pagos
+  pagos               Pago[]
+
+  // Relación con contratos
+  contratos           Contrato[]
+
+  // Relación con IoT
+  dispositivos_iot    DispositivoIoT[]
+
+  // Relación con Chats
+  chats               Chat[]
+
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
 
   @@map("inmuebles")
 }
+
+model Notificacion {
+  id         Int      @id @default(autoincrement())
+  titulo     String
+  mensaje    String   @db.Text
+  tipo       String   @default("info") // 'info' | 'alerta' | 'confirmacion' | 'recordatorio' | 'pago'
+  origen     String   @default("sistema") // 'sistema' | 'usuario'
+  leida      Boolean  @default(false)
+  usuario_id Int?
+  usuario    Usuario? @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+  creada     DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("notificaciones")
+}
+
+model Resena {
+  id           Int       @id @default(autoincrement())
+  calificacion Int       // 1 a 5 estrellas
+  comentario   String?   @db.Text
+
+  inmueble_id  Int
+  inmueble     Inmueble  @relation(fields: [inmueble_id], references: [id], onDelete: Cascade)
+
+  usuario_id   Int
+  usuario      Usuario   @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([usuario_id, inmueble_id])
+  @@map("resenas")
+}
+
+model ConfiguracionPlataforma {
+  id                             Int      @id @default(autoincrement())
+  porcentaje_comision_plataforma Decimal  @default(5.0) @db.Decimal(5, 2)
+  nombre_empresa                 String?  @default("SAIPI")
+  createdAt                      DateTime @default(now())
+  updatedAt                      DateTime @updatedAt
+
+  @@map("configuracion_plataforma")
+}
+
+model Pago {
+  id                  Int          @id @default(autoincrement())
+  monto               Decimal      @db.Decimal(12, 2)
+  comision_plataforma Decimal      @default(0) @db.Decimal(12, 2)
+  monto_neto          Decimal      @default(0) @db.Decimal(12, 2)
+  moneda              String       @default("BOB")
+  concepto            String
+  tipo                String       @default("alquiler") // 'alquiler' | 'garantia' | 'anticretico' | 'reserva'
+  metodo              String       @default("stripe")   // 'stripe' | 'qr' | 'transferencia'
+  estado              String       @default("completado") // 'completado' | 'pendiente' | 'fallido'
+  transaccion_id      String?
+  fecha_pago          DateTime     @default(now())
+
+  inmueble_id         Int?
+  inmueble            Inmueble?    @relation(fields: [inmueble_id], references: [id], onDelete: SetNull)
+
+  inquilino_id        Int?
+  inquilino           Usuario?     @relation("PagosInquilino", fields: [inquilino_id], references: [id], onDelete: SetNull)
+
+  propietario_id      Int?
+  propietario         Usuario?     @relation("PagosPropietario", fields: [propietario_id], references: [id], onDelete: SetNull)
+
+  contrato_id         Int?
+  contrato            Contrato?    @relation(fields: [contrato_id], references: [id], onDelete: SetNull)
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@map("pagos")
+}
+
+model TipoContrato {
+  id          Int        @id @default(autoincrement())
+  nombre      String     @unique // 'Alquiler Habitacional', 'Venta Definitiva', 'Anticrético', 'Alquiler Comercial'
+  descripcion String?
+  contratos   Contrato[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("tipos_contratos")
+}
+
+model Contrato {
+  id                    Int           @id @default(autoincrement())
+
+  inmueble_id           Int
+  inmueble              Inmueble      @relation(fields: [inmueble_id], references: [id], onDelete: Cascade)
+
+  propietario_id        Int
+  propietario           Usuario       @relation("ContratosPropietario", fields: [propietario_id], references: [id], onDelete: Restrict)
+
+  inquilino_id          Int
+  inquilino             Usuario       @relation("ContratosInquilino", fields: [inquilino_id], references: [id], onDelete: Restrict)
+
+  tipo_contrato_id      Int?
+  tipo_contrato         TipoContrato? @relation(fields: [tipo_contrato_id], references: [id], onDelete: SetNull)
+
+  // Términos económicos
+  monto                 Decimal       @db.Decimal(12, 2)
+  moneda                String        @default("BOB")
+  deposito              Decimal?      @default(0) @db.Decimal(12, 2)
+  dia_pago              Int?          @default(5)
+  forma_pago            String?       @default("Stripe")
+
+  // Fechas de Vigencia
+  inicio                DateTime      @db.Date
+  fin                   DateTime?     @db.Date
+
+  // Estados: 'borrador', 'enviado', 'aceptado', 'activo', 'finalizado', 'cancelado', 'rechazado'
+  estado                String        @default("enviado")
+  motivo_rechazo        String?       @db.Text
+
+  // Cláusulas legales detalladas
+  antecedentes          String?       @db.Text
+  clausulas             String?       @db.Text
+  clausulas_especiales  String?       @db.Text
+  uso_exclusivo         String?       @db.Text
+  condiciones_uso       String?       @db.Text
+  penalidades           String?       @db.Text
+  politica_cancelacion  String?       @db.Text
+  incluye_servicios     String?       @db.Text
+  restricciones         String?       @db.Text
+  observaciones         String?       @db.Text
+
+  // Smart Contract & Blockchain Ledger (Hyperledger Fabric / Ethereum)
+  smart_contract_id     String?       // Ej: "CON-1"
+  blockchain_tx         String?       // Hash de transacción ej: "0x7f83b165..."
+  blockchain_block      Int?          // Número de bloque
+  blockchain_audit      Json?         @default("[]") // Historial [{txId, blockNumber, txName, timestamp, data}]
+  fecha_firma           DateTime?
+
+  // Relación con pagos
+  pagos                 Pago[]
+
+  // Relación con IoT
+  reglas_acceso_iot     ReglaAccesoIoT[]
+
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@map("contratos")
+}
+
+model DispositivoIoT {
+  id                 Int                 @id @default(autoincrement())
+  inmueble_id        Int
+  inmueble           Inmueble            @relation(fields: [inmueble_id], references: [id], onDelete: Cascade)
+
+  nombre             String              // ej: "Cerradura Puerta Principal", "Sensor de Entrada"
+  tipo               String              @default("cerradura") // 'cerradura' | 'sensor_apertura' | 'sensor_movimiento' | 'sensor_ambiental'
+  serial_id          String              @unique // ej: "LOCK-TOBOROCHI-01"
+  marca              String?             @default("Yale SmartLock")
+  modelo             String?             @default("Pro 2026")
+  ubicacion          String?             @default("Puerta Principal")
+
+  // Estados en vivo
+  estado_conexion    String              @default("online") // 'online' | 'offline'
+  bateria            Int                 @default(95)       // Porcentaje 0 - 100
+  bloqueado          Boolean             @default(true)     // true = con cerrojo (cerrado), false = abierto
+  codigo_maestro     String?             @default("123456") // PIN maestro de emergencia del propietario
+  configuracion      Json?               @default("{}")     // Parámetros técnicos adicionales
+
+  ultima_conexion    DateTime?           @default(now())
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  reglas_acceso      ReglaAccesoIoT[]
+  historial_acciones HistorialAccionIoT[]
+
+  @@map("dispositivos_iot")
+}
+
+model ReglaAccesoIoT {
+  id                 Int            @id @default(autoincrement())
+  dispositivo_id     Int
+  dispositivo        DispositivoIoT @relation(fields: [dispositivo_id], references: [id], onDelete: Cascade)
+
+  usuario_id         Int
+  usuario            Usuario        @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+
+  contrato_id        Int?
+  contrato           Contrato?      @relation(fields: [contrato_id], references: [id], onDelete: Cascade)
+
+  // Tipo de permiso: 'contrato' | 'visita_agendada' | 'mantenimiento' | 'temporal'
+  tipo_acceso        String         @default("contrato")
+  pin_codigo         String?        // Código PIN temporal ej: "482910"
+  fecha_inicio       DateTime
+  fecha_fin          DateTime?
+
+  // Estado: 'activo' | 'suspendido' | 'expirado' | 'revocado'
+  estado             String         @default("activo")
+  motivo_suspension  String?
+
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@map("reglas_acceso_iot")
+}
+
+model HistorialAccionIoT {
+  id                 Int            @id @default(autoincrement())
+  dispositivo_id     Int
+  dispositivo        DispositivoIoT @relation(fields: [dispositivo_id], references: [id], onDelete: Cascade)
+
+  usuario_id         Int?
+  usuario            Usuario?       @relation(fields: [usuario_id], references: [id], onDelete: SetNull)
+
+  accion             String         // 'desbloquear' | 'bloquear' | 'generar_pin' | 'alarma' | 'cambio_bateria'
+  metodo             String         @default("app") // 'app' | 'pin' | 'nfc' | 'remoto_emergencia' | 'bluetooth'
+  resultado          String         @default("exitoso") // 'exitoso' | 'fallido' | 'rechazado_por_regla'
+  detalles           String?        @db.Text
+  ip                 String?
+
+  createdAt          DateTime       @default(now())
+
+  @@map("historial_acciones_iot")
+}
+
+model Chat {
+  id               Int        @id @default(autoincrement())
+
+  inmueble_id      Int?
+  inmueble         Inmueble?  @relation(fields: [inmueble_id], references: [id], onDelete: SetNull)
+
+  participante1_id Int
+  participante1    Usuario    @relation("ChatsParticipante1", fields: [participante1_id], references: [id], onDelete: Cascade)
+
+  participante2_id Int
+  participante2    Usuario    @relation("ChatsParticipante2", fields: [participante2_id], references: [id], onDelete: Cascade)
+
+  ultimo_mensaje   String?    @db.Text
+  fecha_ultimo     DateTime   @default(now())
+
+  mensajes         Mensaje[]
+
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@map("chats")
+}
+
+model Mensaje {
+  id           Int      @id @default(autoincrement())
+
+  chat_id      Int
+  chat         Chat     @relation(fields: [chat_id], references: [id], onDelete: Cascade)
+
+  remitente_id Int
+  remitente    Usuario  @relation("MensajesRemitente", fields: [remitente_id], references: [id], onDelete: Cascade)
+
+  tipo         String   @default("texto") // 'texto' | 'imagen' | 'archivo' | 'contrato' | 'pago' | 'acceso_360'
+  contenido    String?  @db.Text
+  archivo_url  String?
+  leido        Boolean  @default(false)
+
+  createdAt    DateTime @default(now())
+
+  @@map("mensajes")
+}
+
+model BloqueoUsuario {
+  id           Int      @id @default(autoincrement())
+
+  usuario_id   Int
+  usuario      Usuario  @relation("UsuarioBloqueador", fields: [usuario_id], references: [id], onDelete: Cascade)
+
+  bloqueado_id Int
+  bloqueado    Usuario  @relation("UsuarioBloqueado", fields: [bloqueado_id], references: [id], onDelete: Cascade)
+
+  motivo       String?
+  createdAt    DateTime @default(now())
+
+  @@unique([usuario_id, bloqueado_id])
+  @@map("bloqueos_usuarios")
+}
+

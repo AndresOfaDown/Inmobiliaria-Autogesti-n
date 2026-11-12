@@ -171,17 +171,24 @@ const EditorRecorrido = ({ inmuebleId, tituloPropiedad = '', onClose }) => {
     }
 
     try {
-      let panoramaUrl = '';
+      let fileSrc = panoramaActivo.archivo || '';
+      // Normalizar URL al proxy local para evitar bloqueos CORS en WebGL/canvas
+      if (fileSrc.startsWith('http://localhost:3000/uploads/')) {
+        fileSrc = fileSrc.replace('http://localhost:3000', '');
+      }
+
+      let panoramaUrl = fileSrc;
       try {
-        // Forzar fetch con cache: 'reload' para evadir CORS y caching agresivo
-        const response = await fetch(panoramaActivo.archivo, { cache: 'reload', mode: 'cors' });
-        const blob = await response.blob();
-        const objUrl = URL.createObjectURL(blob);
-        objectUrlRef.current = objUrl;
-        panoramaUrl = objUrl;
+        const response = await fetch(fileSrc, { cache: 'force-cache' });
+        if (response.ok) {
+          const blob = await response.blob();
+          const objUrl = URL.createObjectURL(blob);
+          objectUrlRef.current = objUrl;
+          panoramaUrl = objUrl;
+        }
       } catch (err) {
-        console.warn('Fallo el fetch CORS para el editor, usando URL directa:', err);
-        panoramaUrl = `${panoramaActivo.archivo}?cb=${new Date().getTime()}`;
+        console.warn('Fallo el fetch Blob para el editor, usando URL relativa directa:', err);
+        panoramaUrl = fileSrc;
       }
 
       if (!window.pannellum) {

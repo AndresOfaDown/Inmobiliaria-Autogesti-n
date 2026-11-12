@@ -30,7 +30,8 @@ import {
   ShieldCheck,
   Sun,
   Moon,
-  Monitor
+  Monitor,
+  KeyRound
 } from 'lucide-react';
 import useStore from '../store/store';
 import './Navbar.css';
@@ -347,6 +348,10 @@ const Navbar = ({ isSidebarOpen: externalSidebarOpen, onSidebarToggle: externalS
                         <Link to="/mis-contratos" onClick={() => setIsSidebarOpen(false)} className={`sidebar-drawer__sub-item ${location.pathname.startsWith('/mis-contratos') ? 'active' : ''}`}>
                           <FileText size={16} />
                           <span>Mis Contratos</span>
+                        </Link>
+                        <Link to="/mis-llaves" onClick={() => setIsSidebarOpen(false)} className={`sidebar-drawer__sub-item ${location.pathname.startsWith('/mis-llaves') ? 'active' : ''}`}>
+                          <KeyRound size={16} />
+                          <span>Mis Llaves IoT</span>
                         </Link>
                         <Link to="/mis-pagos" onClick={() => setIsSidebarOpen(false)} className={`sidebar-drawer__sub-item ${location.pathname.startsWith('/mis-pagos') ? 'active' : ''}`}>
                           <CreditCard size={16} />

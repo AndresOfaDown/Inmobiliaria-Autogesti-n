@@ -66,6 +66,7 @@ const Visor360 = ({ panoramas = [], accesoId = null, musica = null }) => {
         id: p.id,
         archivo: p.archivo,
         habitacion,
+        hotspots: p.hotspots || [],
       });
     });
 
@@ -133,22 +134,24 @@ const Visor360 = ({ panoramas = [], accesoId = null, musica = null }) => {
 
     try {
       const imageUrl = escenaActiva.archivo;
+      // Convertir URL del backend a ruta relativa con el mismo origen para evitar bloqueos CORS en WebGL/canvas
       let panoramaUrl = imageUrl || '';
+      if (panoramaUrl.startsWith('http://localhost:3000/uploads/')) {
+        panoramaUrl = panoramaUrl.replace('http://localhost:3000', '');
+      }
 
-      if (imageUrl) {
-        // Intentar fetch con CORS — si falla, usar la URL directa (Pannellum la maneja nativamente)
+      if (panoramaUrl) {
+        // Intentar pre-cargar como Blob ObjectURL
         try {
-          const response = await fetch(imageUrl, { cache: 'force-cache', mode: 'cors' });
+          const response = await fetch(panoramaUrl, { cache: 'force-cache' });
           if (response.ok) {
             const blob = await response.blob();
             const objectUrl = URL.createObjectURL(blob);
             objectUrlRef.current = objectUrl;
             panoramaUrl = objectUrl;
           }
-          // Si no es ok, panoramaUrl ya tiene imageUrl (fallback)
         } catch {
-          // Fallback: usar URL directa — Pannellum usa crossOrigin anonymous internamente
-          panoramaUrl = imageUrl;
+          // Fallback a panoramaUrl directa
         }
       }
 
@@ -158,6 +161,39 @@ const Visor360 = ({ panoramas = [], accesoId = null, musica = null }) => {
       }
       
       if (!viewerRef.current) return;
+
+      // Construir hotspots interactivos tipo Google Street View para caminar entre ambientes
+      const formattedHotspots = (escenaActiva.hotspots || []).map((h) => {
+        const destinoPano = panoramas.find((p) => p.id === h.escena_destino);
+        let texto = h.texto_ayuda;
+        if (!texto && destinoPano) {
+          const desc = destinoPano.descripcion || '';
+          texto = desc.includes('|') ? desc.split('|')[1].trim() : desc;
+        }
+
+        return {
+          pitch: h.pitch,
+          yaw: h.yaw,
+          type: 'info',
+          text: texto || 'Ir a la habitación',
+          clickHandlerFunc: () => {
+            if (destinoPano) {
+              // Si el destino está en otro piso, sincronizar pisoActivo
+              let pisoDestino = 'Piso 1';
+              if (destinoPano.descripcion && destinoPano.descripcion.includes('|')) {
+                pisoDestino = destinoPano.descripcion.split('|')[0].trim();
+              }
+              setPisoActivo(pisoDestino);
+              setEscenaActiva({
+                id: destinoPano.id,
+                archivo: destinoPano.archivo,
+                habitacion: destinoPano.descripcion?.includes('|') ? destinoPano.descripcion.split('|')[1].trim() : destinoPano.descripcion,
+                hotspots: destinoPano.hotspots || [],
+              });
+            }
+          },
+        };
+      });
 
       viewerInstanceRef.current = window.pannellum.viewer(viewerRef.current, {
         type: 'equirectangular',
@@ -177,6 +213,7 @@ const Visor360 = ({ panoramas = [], accesoId = null, musica = null }) => {
         friction: 0.15,
         yaw: 0,
         pitch: 0,
+        hotSpots: formattedHotspots,
       });
 
       viewerInstanceRef.current.on('load', () => {
