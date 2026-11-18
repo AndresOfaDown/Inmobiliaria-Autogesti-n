@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import inmuebleService from '../../services/inmuebleService';
 import useAuth from '../../hooks/useAuth';
-import { Search, SlidersHorizontal, Trash2, Filter, X } from 'lucide-react';
+import { Search, SlidersHorizontal, Trash2, Filter, X, ShieldCheck, ShieldAlert, ShieldX, ShieldOff, Clock } from 'lucide-react';
 import './Propiedades.css';
 
 const Propiedades = () => {
@@ -281,34 +281,121 @@ const Propiedades = () => {
                       <span className="propiedad-card__badge" style={{ background: estadoStyle.bg, color: estadoStyle.color, position: 'static' }}>
                         {inm.estado}
                       </span>
-                      {inm.verificacion_estado && inm.verificacion_estado !== 'no_solicitado' && (
-                        <span
-                          className="propiedad-card__badge"
-                          style={{
-                            background: inm.verificacion_estado === 'verificado' ? '#dcfce7' :
-                              inm.verificacion_estado === 'observado' ? '#fef3c7' :
-                                inm.verificacion_estado === 'procesando' ? '#e0f2fe' : '#fee2e2',
-                            color: inm.verificacion_estado === 'verificado' ? '#15803d' :
-                              inm.verificacion_estado === 'observado' ? '#d97706' :
-                                inm.verificacion_estado === 'procesando' ? '#0369a1' : '#dc2626',
-                            position: 'static',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontWeight: 700
-                          }}
-                          title={
-                            inm.verificacion_estado === 'verificado' ? 'Título de propiedad verificado por IA' :
-                              inm.verificacion_estado === 'observado' ? 'Título observado (advertencias detectadas)' :
-                                inm.verificacion_estado === 'procesando' ? 'Verificación en proceso por la IA' :
-                                  'Título de propiedad inválido o no reconocido'
-                          }
-                        >
-                          {inm.verificacion_estado === 'verificado' ? '✓ Título Ok' :
-                            inm.verificacion_estado === 'observado' ? '⚠ Obs. Título' :
-                              inm.verificacion_estado === 'procesando' ? '⌛ Procesando' : '✗ Inválido'}
-                        </span>
-                      )}
+                      {(() => {
+                        const vEst = inm.verificacion_estado;
+                        if (vEst === 'verificado') {
+                          return (
+                            <span
+                              className="propiedad-card__badge"
+                              style={{
+                                background: '#dcfce7',
+                                color: '#15803d',
+                                border: '1.5px solid #86efac',
+                                position: 'static',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                fontWeight: 800,
+                                fontSize: '0.82rem',
+                                padding: '6px 12px',
+                                borderRadius: '12px',
+                                boxShadow: '0 2px 8px rgba(22, 163, 74, 0.25)',
+                              }}
+                              title="Propiedad con Verificación Oficial: Título y Folio Real validados con IA y Blockchain (Tiene Valor Legal)"
+                            >
+                              <ShieldCheck size={18} color="#16a34a" strokeWidth={2.4} /> Con Valor Legal
+                            </span>
+                          );
+                        } else if (vEst === 'rechazado') {
+                          return (
+                            <span
+                              className="propiedad-card__badge"
+                              style={{
+                                background: '#fee2e2',
+                                color: '#b91c1c',
+                                border: '1.5px solid #fca5a5',
+                                position: 'static',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                fontWeight: 700,
+                                fontSize: '0.8rem',
+                                padding: '5px 10px',
+                                borderRadius: '12px',
+                              }}
+                              title="Título de propiedad inválido o rechazado: No cuenta con valor legal acreditado"
+                            >
+                              <ShieldX size={16} color="#dc2626" strokeWidth={2.2} /> Sin Valor Legal
+                            </span>
+                          );
+                        } else if (vEst === 'observado') {
+                          return (
+                            <span
+                              className="propiedad-card__badge"
+                              style={{
+                                background: '#fef3c7',
+                                color: '#b45309',
+                                border: '1.5px solid #fde047',
+                                position: 'static',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                fontWeight: 700,
+                                fontSize: '0.8rem',
+                                padding: '5px 10px',
+                                borderRadius: '12px',
+                              }}
+                              title="Título con observaciones detectadas por la IA"
+                            >
+                              <ShieldAlert size={16} color="#d97706" strokeWidth={2.2} /> Título Observado
+                            </span>
+                          );
+                        } else if (vEst === 'procesando') {
+                          return (
+                            <span
+                              className="propiedad-card__badge"
+                              style={{
+                                background: '#e0f2fe',
+                                color: '#0369a1',
+                                border: '1.5px solid #bae6fd',
+                                position: 'static',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                fontWeight: 700,
+                                fontSize: '0.8rem',
+                                padding: '5px 10px',
+                                borderRadius: '12px',
+                              }}
+                              title="Verificación legal en proceso por IA"
+                            >
+                              <Clock size={16} color="#0284c7" /> En Verificación
+                            </span>
+                          );
+                        } else {
+                          return (
+                            <span
+                              className="propiedad-card__badge"
+                              style={{
+                                background: '#f8fafc',
+                                color: '#64748b',
+                                border: '1.5px solid #cbd5e1',
+                                position: 'static',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                fontWeight: 600,
+                                fontSize: '0.78rem',
+                                padding: '4px 10px',
+                                borderRadius: '12px',
+                              }}
+                              title="Inmueble sin certificación legal oficial"
+                            >
+                              <ShieldOff size={16} color="#94a3b8" strokeWidth={2.2} /> Sin Verificar
+                            </span>
+                          );
+                        }
+                      })()}
                       {offerStyle && (
                         <span className="propiedad-card__offer-badge" style={{ background: offerStyle.bg, color: offerStyle.color, border: offerStyle.border, position: 'static' }}>
                           {offerStyle.label}
@@ -328,7 +415,79 @@ const Propiedades = () => {
                     </button>
                   </div>
                   <div className="propiedad-card__body">
-                    <h3 className="propiedad-card__title">{inm.titulo}</h3>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+                      <h3 className="propiedad-card__title" style={{ margin: 0, flex: 1 }}>{inm.titulo}</h3>
+                      {inm.verificacion_estado === 'verificado' ? (
+                        <span 
+                          title="Propiedad Oficialmente Verificada con Valor Legal" 
+                          style={{ 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '50%',
+                            background: '#dcfce7',
+                            border: '1.5px solid #86efac',
+                            boxShadow: '0 2px 8px rgba(22, 163, 74, 0.25)',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <ShieldCheck size={22} color="#16a34a" strokeWidth={2.4} />
+                        </span>
+                      ) : inm.verificacion_estado === 'rechazado' ? (
+                        <span 
+                          title="Propiedad sin valor legal (documento rechazado)" 
+                          style={{ 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            background: '#fee2e2',
+                            border: '1.5px solid #fca5a5',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <ShieldX size={18} color="#dc2626" strokeWidth={2.2} />
+                        </span>
+                      ) : inm.verificacion_estado === 'observado' ? (
+                        <span 
+                          title="Propiedad con observaciones legales" 
+                          style={{ 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            background: '#fef3c7',
+                            border: '1.5px solid #fde047',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <ShieldAlert size={18} color="#d97706" strokeWidth={2.2} />
+                        </span>
+                      ) : (
+                        <span 
+                          title="Propiedad sin verificación legal oficial" 
+                          style={{ 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            background: '#f8fafc',
+                            border: '1.5px solid #cbd5e1',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <ShieldOff size={18} color="#94a3b8" strokeWidth={2.2} />
+                        </span>
+                      )}
+                    </div>
                     <p className="propiedad-card__location">{ciudad}{zona ? `, ${zona}` : ''}</p>
                     <div className="propiedad-card__attrs">
                       {inm.habitaciones > 0 && <span>{inm.habitaciones} hab.</span>}

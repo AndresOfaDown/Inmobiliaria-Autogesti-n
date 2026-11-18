@@ -3,7 +3,7 @@ import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 export class AccionDispositivoDto {
   @IsNotEmpty()
   @IsString()
-  accion: 'desbloquear' | 'bloquear' | 'generar_pin' | 'verificar_estado';
+  accion: 'desbloquear' | 'bloquear' | 'encender' | 'apagar' | 'generar_pin' | 'verificar_estado';
 
   @IsOptional()
   @IsString()

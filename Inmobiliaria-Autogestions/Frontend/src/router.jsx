@@ -24,6 +24,7 @@ import MisContratos from './pages/Public/MisContratos';
 import MisPagos from './pages/Public/MisPagos';
 import MisLlaves from './pages/Public/MisLlaves';
 import TestConexion from './pages/Public/TestConexion';
+import VerificarPago from './pages/Public/VerificarPago';
 
 // Pages - Admin
 import DashboardAdmin from './pages/Admin/DashboardAdmin';
@@ -75,6 +76,10 @@ const router = createBrowserRouter([
       {
         path: '/test-conexion',
         element: <TestConexion />,
+      },
+      {
+        path: '/verificar-pago/:id',
+        element: <VerificarPago />,
       },
       {
         element: <ProtectedRoute />,

@@ -8,7 +8,18 @@ import useAlertConfirm from '../hooks/useAlertConfirm';
 import * as XLSX from 'xlsx';
 import html2pdf from 'html2pdf.js';
 
-const AdminCrud = ({ title, subtitle, endpoint, columns, formFields, idKey = 'id', transformPayload, transformEditItem }) => {
+const AdminCrud = ({
+  title,
+  subtitle,
+  endpoint,
+  columns,
+  formFields,
+  idKey = 'id',
+  transformPayload,
+  transformEditItem,
+  extraHeaderControls,
+  filterPredicate,
+}) => {
   const { showAlert, showConfirm, ModalComponent } = useAlertConfirm();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -302,6 +313,7 @@ const AdminCrud = ({ title, subtitle, endpoint, columns, formFields, idKey = 'id
   useEffect(() => { setCurrentPage(1); }, [searchTerm]);
 
   const filtered = items.filter(item => {
+    if (filterPredicate && !filterPredicate(item)) return false;
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
     return columns.some(col => {
@@ -821,6 +833,12 @@ const AdminCrud = ({ title, subtitle, endpoint, columns, formFields, idKey = 'id
             </div>
           </div>
         </div>
+
+        {extraHeaderControls && (
+          <div style={{ marginBottom: '16px' }}>
+            {extraHeaderControls}
+          </div>
+        )}
 
         {loading ? (
           <p style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>Cargando...</p>

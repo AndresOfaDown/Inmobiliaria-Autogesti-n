@@ -20,9 +20,14 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 export class ContratosController {
   constructor(private readonly contratosService: ContratosService) {}
 
-  @Get()
+  @Get(['', '/', 'panel/contratos', 'panel/contratos/'])
   listar(@Request() req: any) {
     return this.contratosService.listar(req.user);
+  }
+
+  @Get(['tipos', 'tipos/'])
+  listarTipos() {
+    return this.contratosService.listarTipos();
   }
 
   @Post(['', 'crear-con-ia'])

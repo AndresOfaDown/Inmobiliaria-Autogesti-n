@@ -86,7 +86,7 @@ export class UsuariosController {
   // ─── GESTIÓN DE USUARIOS (PANEL ADMINISTRADOR) ────────────────────
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Get('panel/lista')
+  @Get(['panel/lista', 'panel/lista/', 'lista', 'lista/'])
   listarPanel() {
     return this.usuariosService.listarPanel();
   }
@@ -148,9 +148,19 @@ export class UsuariosController {
   // ─── HU-19 NOTIFICACIONES (PANEL ADMINISTRADOR) ───────────────────
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  @Get(['panel/notificaciones', 'panel/notificaciones/'])
+  @Get(['panel/notificaciones', 'panel/notificaciones/', 'notificaciones', 'notificaciones/'])
   listarNotificacionesPanel() {
     return this.usuariosService.listarNotificacionesPanel();
+  }
+
+  // ─── AGENDA DE VISITAS / EVENTOS (PANEL) ─────────────────────────
+  @UseGuards(JwtAuthGuard)
+  @Get(['panel/agenda', 'panel/agenda/', 'agenda', 'agenda/'])
+  listarAgenda() {
+    return [
+      { id: 1, titulo: 'Inspección Inmueble Toborochi', descripcion: 'Revisión técnica de cerradura y domótica', fecha_inicio: new Date().toISOString(), completado: true },
+      { id: 2, titulo: 'Visita Guiada - Inmueble #5', descripcion: 'Recorrido presencial con inquilino interesado', fecha_inicio: new Date(Date.now() + 86400000).toISOString(), completado: false },
+    ];
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -214,6 +214,16 @@ export class InmueblesService {
     return items.map((inm) => this.formatInmueble(inm, currentUserId, favIds));
   }
 
+  async listarCiudades() {
+    const inmuebles = await this.prisma.inmueble.findMany({
+      select: { ciudad: true },
+      distinct: ['ciudad'],
+      where: { ciudad: { not: null } },
+    });
+    const ciudades = inmuebles.map((i) => i.ciudad).filter(Boolean);
+    return ciudades.length > 0 ? ciudades : ['Santa Cruz', 'La Paz', 'Cochabamba'];
+  }
+
   // ─── 2. DETALLE DE UN INMUEBLE ────────────────────────────────────
   async getById(id: number, currentUser?: any) {
     const inm = await this.prisma.inmueble.findUnique({
@@ -1180,6 +1190,65 @@ export class InmueblesService {
       }
     }
 
+    if (assetId.startsWith('PAG-')) {
+      const pagoId = parseInt(assetId.replace('PAG-', ''), 10);
+      if (!isNaN(pagoId)) {
+        try {
+          const p = await this.prisma.pago.findUnique({
+            where: { id: pagoId },
+            include: {
+              inmueble: true,
+              inquilino: true,
+              propietario: true,
+            },
+          });
+          if (p) {
+            const pagoHash =
+              '0x' +
+              crypto
+                .createHash('sha256')
+                .update(`PAG-${p.id}-${p.transaccion_id || 'SAIPI'}-${p.monto}-${p.fecha_pago.toISOString()}`)
+                .digest('hex');
+
+            return [
+              {
+                txId: pagoHash.substring(0, 34),
+                txName: 'registrarPago',
+                txType: 'registrarPago',
+                blockNumber: 2040 + p.id,
+                timestamp: p.fecha_pago.toISOString(),
+                assetId,
+                actor: `SAIPI Smart Escrow Gateway (${p.metodo.toUpperCase()})`,
+                hash: pagoHash,
+                data: {
+                  smart_escrow_id: `ESCROW-PAG-${p.id}`,
+                  monto_bruto: `Bs ${Number(p.monto).toLocaleString('es-BO', { minimumFractionDigits: 2 })}`,
+                  comision_plataforma_admin: `Bs ${Number(p.comision_plataforma).toLocaleString('es-BO', { minimumFractionDigits: 2 })} (Retención)`,
+                  monto_neto_propietario: `Bs ${Number(p.monto_neto).toLocaleString('es-BO', { minimumFractionDigits: 2 })}`,
+                  concepto: p.concepto,
+                  metodo: p.metodo.toUpperCase(),
+                  transaccion_gateway: p.transaccion_id || `TX-REC-${p.id}`,
+                  estado_blockchain: 'CONFIRMADO_INMUTABLE',
+                  pagador: p.inquilino ? `${p.inquilino.first_name} ${p.inquilino.last_name} (CI: ${p.inquilino.ci || 'N/A'})` : 'Inquilino',
+                  beneficiario: p.propietario ? `${p.propietario.first_name} ${p.propietario.last_name} (CI: ${p.propietario.ci || 'N/A'})` : 'Propietario',
+                  inmueble: p.inmueble?.titulo || 'Propiedad Inmobiliaria',
+                },
+                detalles: {
+                  monto_bruto: `Bs ${Number(p.monto).toLocaleString('es-BO')}`,
+                  comision_plataforma: `Bs ${Number(p.comision_plataforma).toLocaleString('es-BO')}`,
+                  monto_neto: `Bs ${Number(p.monto_neto).toLocaleString('es-BO')}`,
+                  concepto: p.concepto,
+                  estado: p.estado,
+                },
+              },
+            ];
+          }
+        } catch (e) {
+          console.error('Error fetching pago blockchain audit:', e);
+        }
+      }
+    }
+
     const hash = crypto.createHash('sha256').update(assetId).digest('hex');
     const txId = '0x' + hash.substring(0, 32);
 
@@ -1231,36 +1300,97 @@ export class InmueblesService {
   }
 
   async getBlockchainStats() {
+    const [inmueblesCount, contratosCount, pagosCount] = await Promise.all([
+      this.prisma.inmueble.count(),
+      this.prisma.contrato.count(),
+      this.prisma.pago.count(),
+    ]);
+
+    const totalBlocks = 2050 + pagosCount + contratosCount;
+
+    // Obtener transacciones de contratos con auditoría y pagos reales
+    const ultimosPagos = await this.prisma.pago.findMany({
+      take: 10,
+      orderBy: { fecha_pago: 'desc' },
+      include: { inmueble: { select: { titulo: true } } },
+    });
+
+    const ultimosContratos = await this.prisma.contrato.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: { inmueble: { select: { titulo: true } } },
+    });
+
+    const blocks: any[] = [];
+    let bNum = totalBlocks;
+
+    ultimosPagos.forEach((p) => {
+      const bHash = p.transaccion_id || ('0x' + crypto.createHash('sha256').update(`PAGO-${p.id}`).digest('hex'));
+      const pHash = '0x' + crypto.createHash('sha256').update(`PREV-${bNum}`).digest('hex');
+      blocks.push({
+        blockNumber: bNum--,
+        blockHash: bHash,
+        hash: bHash,
+        prevHash: pHash,
+        previousHash: pHash,
+        timestamp: p.fecha_pago ? p.fecha_pago.toISOString() : new Date().toISOString(),
+        transactions: [
+          {
+            id: bHash,
+            txName: 'registrarPago',
+            blockNumber: bNum + 1,
+            timestamp: p.fecha_pago ? p.fecha_pago.toISOString() : new Date().toISOString(),
+            assetId: `PAGO-${p.id}`,
+            status: 'COMMITTED',
+            details: `Pago de canon Bs. ${p.monto} sellado en contrato #${p.contrato_id} (${p.inmueble?.titulo || 'Inmueble'})`,
+          },
+        ],
+      });
+    });
+
+    ultimosContratos.forEach((c) => {
+      const cHash = '0x' + crypto.createHash('sha256').update(`CON-${c.id}`).digest('hex');
+      const pHash = '0x' + crypto.createHash('sha256').update(`PREV-${bNum}`).digest('hex');
+      blocks.push({
+        blockNumber: bNum--,
+        blockHash: cHash,
+        hash: cHash,
+        prevHash: pHash,
+        previousHash: pHash,
+        timestamp: c.createdAt.toISOString(),
+        transactions: [
+          {
+            id: cHash,
+            txName: 'firmarContrato',
+            blockNumber: bNum + 1,
+            timestamp: c.createdAt.toISOString(),
+            assetId: `CON-${c.id}`,
+            status: 'COMMITTED',
+            details: `Firma digital y Smart Contract activo para ${c.inmueble?.titulo || 'Inmueble'}`,
+          },
+        ],
+      });
+    });
+
     return {
-      totalBlocks: 1428,
-      totalTransactions: 3894,
+      status: 'UP',
       networkStatus: 'ONLINE',
-      channel: 'saipi-channel-main',
+      mode: 'SIMULADO (Ledger JSON)',
+      channel: 'canal de autogestión',
       consensus: 'Raft BFT',
       peersCount: 4,
+      totalBlocks,
+      totalTransactions: totalBlocks * 2 + 15,
+      totalInmuebles: inmueblesCount,
+      totalContratos: contratosCount,
+      totalPagos: pagosCount,
       latestBlock: {
-        number: 1428,
-        hash: '0x' + crypto.createHash('sha256').update('latestBlock-1428').digest('hex'),
+        number: totalBlocks,
+        hash: blocks[0]?.hash || ('0x' + crypto.createHash('sha256').update('latest').digest('hex')),
         timestamp: new Date().toISOString(),
       },
-      transactions: [
-        {
-          id: '0x7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069',
-          txName: 'registrarInmueble',
-          blockNumber: 1428,
-          timestamp: new Date().toISOString(),
-          assetId: 'INM-6',
-          status: 'COMMITTED',
-        },
-        {
-          id: '0x3a4b5c6d7e8f90123456789abcdef0123456789abcdef0123456789abcdef012',
-          txName: 'firmarContrato',
-          blockNumber: 1427,
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
-          assetId: 'CON-1',
-          status: 'COMMITTED',
-        },
-      ],
+      blocks,
+      transactions: blocks.flatMap((b) => b.transactions),
     };
   }
 }

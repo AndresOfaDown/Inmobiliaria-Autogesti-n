@@ -43,6 +43,12 @@ export class InmueblesController {
   }
 
   @UseGuards(OptionalJwtAuthGuard)
+  @Get(['lista/ciudades', 'lista/ciudades/'])
+  listarCiudades() {
+    return this.inmueblesService.listarCiudades();
+  }
+
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('lista/:id')
   getByIdPublico(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
     return this.inmueblesService.getById(id, req.user);

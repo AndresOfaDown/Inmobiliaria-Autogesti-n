@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
   FileText, CheckCircle, XCircle, Clock, AlertTriangle, Home, User, Sparkles, Send, Bot, RotateCcw,
-  ClipboardList, MessageSquare, Printer, Ban, ShieldCheck, Lightbulb, Calendar, RefreshCw, Zap, History
+  ClipboardList, MessageSquare, Printer, Ban, ShieldCheck, Lightbulb, Calendar, RefreshCw, Zap, History, CreditCard, Cpu
 } from 'lucide-react';
 import BlockchainAuditTrail from './BlockchainAuditTrail';
+import ModalPagarAlquiler from './ModalPagarAlquiler';
 import useAlertConfirm from '../hooks/useAlertConfirm';
 import contratoService from '../services/contratoService';
 
@@ -27,6 +28,7 @@ const ContratoDetalle = ({ contrato: c, user, onUpdate }) => {
   // ── Estados para la navegación por Pestañas y Vista PDF ──
   const [activeTab, setActiveTab] = useState('resumen'); // 'resumen', 'chat', 'pdf'
   const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
+  const [showPagarModal, setShowPagarModal] = useState(false);
 
   // ── Chat con Asistente IA ──────────────────────────────
   const [chatMensajes, setChatMensajes] = useState([]);
@@ -451,6 +453,43 @@ const ContratoDetalle = ({ contrato: c, user, onUpdate }) => {
               <div style={rowStyle}><span style={labelStyle}>Vigencia</span><span style={valueStyle}>{c.inicio} → {c.fin || 'Indefinido'}</span></div>
             </div>
 
+            {/* Domótica y Alquiler Modular IoT */}
+            <div style={sectionStyle}>
+              <div style={{ ...titleStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Cpu size={16} color="#0284c7" /> Alquiler Modular de Inmueble Inteligente (IoT)
+                </span>
+                <span style={{ fontSize: '0.75rem', color: '#059669', background: '#ecfdf5', padding: '2px 8px', borderRadius: '10px', border: '1px solid #a7f3d0', fontWeight: 700 }}>
+                  Smart Contract Sincronizado
+                </span>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 10px', lineHeight: 1.4 }}>
+                Los artefactos seleccionados son habilitados automáticamente por el Smart Contract. El resto permanece bloqueado:
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', padding: '6px 10px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                  <span style={{ color: '#166534', fontWeight: 600 }}>🔒 Cerradura Inteligente (Acceso Peatonal)</span>
+                  <span style={{ fontWeight: 700, color: '#166534' }}>Habilitado (Base)</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', padding: '6px 10px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                  <span style={{ color: '#166534', fontWeight: 600 }}>🚗 Portón Vehicular Automatizado</span>
+                  <span style={{ fontWeight: 700, color: '#166534' }}>Habilitado (+Bs 200/mes)</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', padding: '6px 10px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                  <span style={{ color: '#166534', fontWeight: 600 }}>❄️ Aire Acondicionado Suite Master</span>
+                  <span style={{ fontWeight: 700, color: '#166534' }}>Habilitado (+Bs 250/mes)</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', padding: '6px 10px', background: '#fff1f2', borderRadius: '8px', border: '1px solid #fecdd3' }}>
+                  <span style={{ color: '#9f1239', fontWeight: 600 }}>📺 Smart TV 65" 4K QLED Sala</span>
+                  <span style={{ fontWeight: 700, color: '#be123c' }}>Bloqueado por Smart Contract (+Bs 150)</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', padding: '6px 10px', background: '#fff1f2', borderRadius: '8px', border: '1px solid #fecdd3' }}>
+                  <span style={{ color: '#9f1239', fontWeight: 600 }}>❄️ Aire Acondicionado Living Comedor</span>
+                  <span style={{ fontWeight: 700, color: '#be123c' }}>Bloqueado por Smart Contract (+Bs 200)</span>
+                </div>
+              </div>
+            </div>
+
             {/* Cláusulas Legales */}
             {c.antecedentes && <div style={sectionStyle}><div style={titleStyle}>Antecedentes</div><div style={{ fontSize: '0.88rem', color: '#374151', whiteSpace: 'pre-wrap', background: '#f0f9ff', padding: '12px', borderRadius: '8px', lineHeight: '1.6', border: '1px solid #bae6fd' }}>{c.antecedentes}</div></div>}
             {c.clausulas && <div style={sectionStyle}><div style={titleStyle}>Cláusulas</div><div style={{ fontSize: '0.88rem', color: '#374151', whiteSpace: 'pre-wrap', background: '#f8fafc', padding: '12px', borderRadius: '8px', lineHeight: '1.6' }}>{c.clausulas}</div></div>}
@@ -490,6 +529,33 @@ const ContratoDetalle = ({ contrato: c, user, onUpdate }) => {
                   </button>
                 </div>
               </div>
+            )}
+
+            {/* Botón Pagar Alquiler (Inquilino en contrato activo) */}
+            {esCliente && (c.estado === 'activo' || c.estado === 'aceptado') && (
+              <button
+                onClick={() => setShowPagarModal(true)}
+                style={{
+                  width: '100%',
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  padding: '13px',
+                  fontWeight: 800,
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.3)',
+                  marginTop: '14px',
+                  marginBottom: '4px'
+                }}
+              >
+                <CreditCard size={20} /> Pagar Mensualidad de Alquiler (Bs {Number(c.monto).toLocaleString('es-BO')})
+              </button>
             )}
 
             {/* Botón Descargar Básico */}
@@ -841,6 +907,16 @@ const ContratoDetalle = ({ contrato: c, user, onUpdate }) => {
 
       {/* Renders ModalComponent inside ContratoDetalle to keep it self-contained */}
       {ModalComponent}
+
+      {/* Modal para Pagar Alquiler */}
+      <ModalPagarAlquiler
+        isOpen={showPagarModal}
+        onClose={() => setShowPagarModal(false)}
+        contratoInicial={c}
+        onPagoExitoso={() => {
+          if (onUpdate) onUpdate();
+        }}
+      />
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }

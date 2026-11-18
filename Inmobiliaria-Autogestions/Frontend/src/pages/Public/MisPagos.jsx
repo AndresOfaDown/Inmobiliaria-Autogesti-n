@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 import BlockchainAuditTrail from '../../components/BlockchainAuditTrail';
+import ModalPagarAlquiler from '../../components/ModalPagarAlquiler';
 import { 
   CreditCard, 
   Search, 
@@ -11,7 +12,10 @@ import {
   ArrowRight,
   Download,
   Building2,
-  Receipt
+  Receipt,
+  ExternalLink,
+  ShieldCheck,
+  QrCode
 } from 'lucide-react';
 import './MisPagos.css';
 
@@ -20,6 +24,28 @@ const MisPagos = () => {
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState('');
   const [pagoSeleccionado, setPagoSeleccionado] = useState(null);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [showPagarModal, setShowPagarModal] = useState(false);
+
+  const handleDownloadComprobante = (id) => {
+    try {
+      setDownloadingPdf(true);
+      const baseURL = api.defaults.baseURL || 'http://localhost:3000/api';
+      const cleanBase = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
+      const downloadUrl = `${cleanBase}/pagos/comprobante/${id}/pdf`;
+      
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute('download', `Comprobante_Pago_REC-${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Error al descargar comprobante PDF:', err);
+    } finally {
+      setTimeout(() => setDownloadingPdf(false), 1500);
+    }
+  };
 
   useEffect(() => {
     fetchPagos();
@@ -62,15 +88,38 @@ const MisPagos = () => {
             <p className="mispagos-subtitle">Historial detallado de tus transacciones inmobiliarias</p>
           </div>
 
-          <div className="mispagos-search-container">
-            <Search className="mispagos-search-icon" size={18} />
-            <input 
-              type="text" 
-              placeholder="Buscar por propiedad o referencia..." 
-              value={filtro}
-              onChange={(e) => setFiltro(e.target.value)}
-              className="mispagos-search-input"
-            />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setShowPagarModal(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'linear-gradient(135deg, #10b981, #059669)',
+                color: '#ffffff',
+                border: 'none',
+                padding: '10px 18px',
+                borderRadius: '12px',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <CreditCard size={18} /> Pagar Mensualidad
+            </button>
+
+            <div className="mispagos-search-container" style={{ margin: 0 }}>
+              <Search className="mispagos-search-icon" size={18} />
+              <input 
+                type="text" 
+                placeholder="Buscar por propiedad o referencia..." 
+                value={filtro}
+                onChange={(e) => setFiltro(e.target.value)}
+                className="mispagos-search-input"
+              />
+            </div>
           </div>
         </header>
 
@@ -191,28 +240,56 @@ const MisPagos = () => {
                   </div>
                 </div>
                 
-                <div className="mispagos-modal-amount-banner">
-                  <div>
-                    <span className="mispagos-amount-banner-lbl">Monto Total Liquidado</span>
-                    <span style={{ color: '#0ea5e9', fontSize: '0.85rem', fontWeight: 700 }}>Moneda oficial: Bolivianos (BOB)</span>
+                {/* Desglose Financiero con Comisión de Plataforma */}
+                <div style={{ background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                  <div style={{ padding: '12px 18px', background: '#1e293b', color: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.85rem', fontWeight: 700 }}>
+                    <span>Liquidación Financiera Oficial</span>
+                    <span style={{ color: '#38bdf8' }}>Moneda: Bolivianos (BOB)</span>
                   </div>
-                  <span className="mispagos-amount-banner-val">
-                    Bs {parseFloat(pagoSeleccionado.monto).toLocaleString('es-BO')}
-                  </span>
+                  <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#475569' }}>
+                      <span>Monto Bruto Depositado (Inquilino):</span>
+                      <strong style={{ color: '#1e293b' }}>Bs {parseFloat(pagoSeleccionado.monto || 0).toLocaleString('es-BO', { minimumFractionDigits: 2 })}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#dc2626' }}>
+                      <span>(-) Retención Comisión Plataforma SAIPI (Admin):</span>
+                      <strong>- Bs {parseFloat(pagoSeleccionado.comision_plataforma || 0).toLocaleString('es-BO', { minimumFractionDigits: 2 })}</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.05rem', color: '#166534', borderTop: '1px solid #cbd5e1', paddingTop: '10px', marginTop: '2px', fontWeight: 800 }}>
+                      <span>(=) Monto Neto Liquidado al Propietario:</span>
+                      <span style={{ fontSize: '1.2rem' }}>Bs {parseFloat(pagoSeleccionado.monto_neto || pagoSeleccionado.monto || 0).toLocaleString('es-BO', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Trazabilidad inmutable en Blockchain */}
               <div style={{ marginTop: '24px', borderTop: '1px dashed #cbd5e1', paddingTop: '20px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#059669', fontWeight: 700, fontSize: '0.9rem' }}>
+                    <ShieldCheck size={18} />
+                    <span>Registro Inmutable con Código QR y SHA-256</span>
+                  </div>
+                  <a
+                    href={`/verificar-pago/${pagoSeleccionado.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', fontWeight: 700, color: '#0284c7', textDecoration: 'none', background: '#e0f2fe', padding: '4px 10px', borderRadius: '8px' }}
+                  >
+                    <QrCode size={14} /> Verificar QR en Línea <ExternalLink size={12} />
+                  </a>
+                </div>
                 <BlockchainAuditTrail assetId={`PAG-${pagoSeleccionado.id}`} />
               </div>
 
               <div className="mispagos-modal-actions">
                 <button 
-                  onClick={() => window.print()}
+                  onClick={() => handleDownloadComprobante(pagoSeleccionado.id)}
+                  disabled={downloadingPdf}
                   className="mispagos-modal-btn-secondary"
+                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 >
-                  <Download size={22} /> Descargar en PDF
+                  <Download size={20} /> {downloadingPdf ? 'Generando PDF...' : 'Descargar en PDF'}
                 </button>
                 <button 
                   onClick={() => setPagoSeleccionado(null)}
@@ -230,6 +307,15 @@ const MisPagos = () => {
           </div>
         </div>
       )}
+
+      {/* Modal para Realizar Pago de Alquiler */}
+      <ModalPagarAlquiler
+        isOpen={showPagarModal}
+        onClose={() => setShowPagarModal(false)}
+        onPagoExitoso={() => {
+          fetchPagos();
+        }}
+      />
 
       <style>{`
         .spin { animation: spin 2s linear infinite; }

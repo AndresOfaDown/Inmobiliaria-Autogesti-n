@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Heart, Share2, MapPin, Bed, Bath, Maximize2, X, ChevronLeft,
   ChevronRight, Home, Video, MessageCircle, Check, AlertCircle, Calendar,
-  ShieldCheck, ShieldAlert, Lock, Orbit
+  ShieldCheck, ShieldAlert, ShieldX, ShieldOff, Lock, Orbit
 } from 'lucide-react';
 
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
@@ -347,32 +347,95 @@ const PropiedadDetalle = () => {
                         <span style={{ background: estadoStyle.bg, color: estadoStyle.color, padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', width: 'fit-content' }}>
                           {inmueble.estado}
                         </span>
-                        {inmueble.verificacion_estado && inmueble.verificacion_estado !== 'no_solicitado' && (
-                          <span 
-                            style={{ 
-                              background: inmueble.verificacion_estado === 'verificado' ? '#dcfce7' : 
-                                          inmueble.verificacion_estado === 'observado' ? '#fef3c7' : 
-                                          inmueble.verificacion_estado === 'procesando' ? '#e0f2fe' : '#fee2e2',
-                              color: inmueble.verificacion_estado === 'verificado' ? '#15803d' : 
-                                     inmueble.verificacion_estado === 'observado' ? '#d97706' : 
-                                     inmueble.verificacion_estado === 'procesando' ? '#0369a1' : '#dc2626',
-                              padding: '6px 14px', 
-                              borderRadius: '20px', 
-                              fontSize: '0.8rem', 
-                              fontWeight: 700,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                              width: 'fit-content'
-                            }}
-                          >
-                            {inmueble.verificacion_estado === 'verificado' ? <ShieldCheck size={14} /> : <ShieldAlert size={14} />}
-                            {inmueble.verificacion_estado === 'verificado' ? '✓ Título Verificado con IA' : 
-                             inmueble.verificacion_estado === 'observado' ? '⚠ Título Observado' : 
-                             inmueble.verificacion_estado === 'procesando' ? '⌛ Procesando Verificación' : '✗ Título Inválido'}
-                          </span>
-                        )}
+                        {(() => {
+                          const vEst = inmueble.verificacion_estado;
+                          if (vEst === 'verificado') {
+                            return (
+                              <span 
+                                style={{ 
+                                  background: '#dcfce7', 
+                                  color: '#15803d',
+                                  border: '1.5px solid #86efac',
+                                  padding: '7px 16px', 
+                                  borderRadius: '20px', 
+                                  fontSize: '0.88rem', 
+                                  fontWeight: 800,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  boxShadow: '0 4px 10px rgba(22, 163, 74, 0.25)',
+                                  width: 'fit-content'
+                                }}
+                                title="Propiedad Oficialmente Verificada: Cuenta con valor legal certificado en Derechos Reales y Blockchain"
+                              >
+                                <ShieldCheck size={20} color="#16a34a" strokeWidth={2.4} /> Con Valor Legal Verificado
+                              </span>
+                            );
+                          } else if (vEst === 'rechazado') {
+                            return (
+                              <span 
+                                style={{ 
+                                  background: '#fee2e2', 
+                                  color: '#b91c1c',
+                                  border: '1.5px solid #fca5a5',
+                                  padding: '6px 14px', 
+                                  borderRadius: '20px', 
+                                  fontSize: '0.82rem', 
+                                  fontWeight: 700,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '7px',
+                                  width: 'fit-content'
+                                }}
+                                title="Título rechazado: No cuenta con valor legal acreditado"
+                              >
+                                <ShieldX size={18} color="#dc2626" strokeWidth={2.2} /> Sin Valor Legal (Rechazado)
+                              </span>
+                            );
+                          } else if (vEst === 'observado') {
+                            return (
+                              <span 
+                                style={{ 
+                                  background: '#fef3c7', 
+                                  color: '#b45309',
+                                  border: '1.5px solid #fde047',
+                                  padding: '6px 14px', 
+                                  borderRadius: '20px', 
+                                  fontSize: '0.82rem', 
+                                  fontWeight: 700,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '7px',
+                                  width: 'fit-content'
+                                }}
+                                title="Título con observaciones legales"
+                              >
+                                <ShieldAlert size={18} color="#d97706" strokeWidth={2.2} /> Título con Observaciones
+                              </span>
+                            );
+                          } else {
+                            return (
+                              <span 
+                                style={{ 
+                                  background: '#f8fafc', 
+                                  color: '#64748b',
+                                  border: '1.5px solid #cbd5e1',
+                                  padding: '6px 14px', 
+                                  borderRadius: '20px', 
+                                  fontSize: '0.82rem', 
+                                  fontWeight: 600,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '7px',
+                                  width: 'fit-content'
+                                }}
+                                title="Propiedad sin verificación legal oficial"
+                              >
+                                <ShieldOff size={18} color="#94a3b8" strokeWidth={2.2} /> Sin Verificación Legal
+                              </span>
+                            );
+                          }
+                        })()}
                         
                         {offerStyle && (
                           <span style={{ background: offerStyle.bg, color: offerStyle.color, border: offerStyle.border, padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', backdropFilter: 'blur(4px)', width: 'fit-content' }}>
@@ -614,14 +677,15 @@ const PropiedadDetalle = () => {
                     </div>
                   )}
 
-            {inmueble.verificacion_estado && inmueble.verificacion_estado !== 'no_solicitado' && (
               <div style={{ 
                 marginBottom: '32px',
                 background: inmueble.verificacion_estado === 'verificado' ? '#f0fdf4' : 
-                            inmueble.verificacion_estado === 'observado' ? '#fffbeb' : '#fef2f2',
+                            inmueble.verificacion_estado === 'observado' ? '#fffbeb' : 
+                            inmueble.verificacion_estado === 'rechazado' ? '#fef2f2' : '#f8fafc',
                 border: '1px solid ' + (
                             inmueble.verificacion_estado === 'verificado' ? '#bbf7d0' : 
-                            inmueble.verificacion_estado === 'observado' ? '#fef08a' : '#fecaca'
+                            inmueble.verificacion_estado === 'observado' ? '#fef08a' : 
+                            inmueble.verificacion_estado === 'rechazado' ? '#fecaca' : '#e2e8f0'
                          ),
                 borderRadius: '12px',
                 padding: '24px',
@@ -635,22 +699,28 @@ const PropiedadDetalle = () => {
                   alignItems: 'center', 
                   gap: '8px',
                   color: inmueble.verificacion_estado === 'verificado' ? '#166534' : 
-                         inmueble.verificacion_estado === 'observado' ? '#92400e' : '#991b1b'
+                         inmueble.verificacion_estado === 'observado' ? '#92400e' : 
+                         inmueble.verificacion_estado === 'rechazado' ? '#991b1b' : '#475569'
                 }}>
                   {inmueble.verificacion_estado === 'verificado' ? (
                     <>
                       <ShieldCheck size={24} style={{ color: '#16a34a' }} />
-                      Título Verificado por IA (Garantía de Autenticidad)
+                      Título Verificado Oficialmente (Valor Legal Garantizado)
                     </>
                   ) : inmueble.verificacion_estado === 'observado' ? (
                     <>
                       <ShieldAlert size={24} style={{ color: '#d97706' }} />
-                      Título con Observaciones
+                      Título con Observaciones Legales
+                    </>
+                  ) : inmueble.verificacion_estado === 'rechazado' ? (
+                    <>
+                      <ShieldX size={24} style={{ color: '#dc2626' }} />
+                      Documentación Rechazada (Sin Valor Legal)
                     </>
                   ) : (
                     <>
-                      <ShieldAlert size={24} style={{ color: '#dc2626' }} />
-                      Documentación de Propiedad con Advertencias
+                      <ShieldOff size={24} style={{ color: '#64748b' }} />
+                      Inmueble Pendiente de Verificación Legal Oficial
                     </>
                   )}
                 </h3>
@@ -659,9 +729,14 @@ const PropiedadDetalle = () => {
                   fontSize: '0.95rem', 
                   lineHeight: '1.6', 
                   color: inmueble.verificacion_estado === 'verificado' ? '#1e4620' : 
-                         inmueble.verificacion_estado === 'observado' ? '#78350f' : '#7f1d1d'
+                         inmueble.verificacion_estado === 'observado' ? '#78350f' : 
+                         inmueble.verificacion_estado === 'rechazado' ? '#7f1d1d' : '#475569'
                 }}>
-                  {inmueble.verificacion_resumen || 'La documentación legal de propiedad fue analizada automáticamente por nuestra Inteligencia Artificial.'}
+                  {inmueble.verificacion_resumen || (
+                    inmueble.verificacion_estado === 'verificado'
+                      ? 'La documentación legal de propiedad fue analizada y certificada exitosamente por nuestra Inteligencia Artificial.'
+                      : 'Este inmueble aún no ha completado el proceso de validación oficial de título de propiedad y folio real.'
+                  )}
                 </p>
                 {inmueble.verificacion_estado === 'verificado' && inmueble.verificacion_score && (
                   <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -681,7 +756,6 @@ const PropiedadDetalle = () => {
                   </div>
                 )}
               </div>
-            )}
 
             {inmueble.gps && (
               <div style={{ marginBottom: '32px' }}>

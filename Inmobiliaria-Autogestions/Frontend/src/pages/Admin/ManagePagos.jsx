@@ -19,10 +19,25 @@ const ManagePagos = () => {
 
   const columns = [
     { key: 'id', label: 'ID' },
-    { key: 'contrato', label: 'Contrato', render: (item) => `#${item.contrato}` },
-    { key: 'monto', label: 'Monto (Bs)', render: (item) => `Bs. ${parseFloat(item.monto || 0).toLocaleString()}` },
-    { key: 'fecha_pago', label: 'Fecha de Pago' },
-    { key: 'referencia', label: 'Referencia' },
+    { key: 'contrato', label: 'Contrato', render: (item) => `#${item.contrato_id || item.contrato}` },
+    { key: 'inmueble', label: 'Inmueble', render: (item) => item.inmueble?.titulo || 'Inmueble' },
+    { key: 'monto', label: 'Monto Bruto', render: (item) => `Bs. ${parseFloat(item.monto || 0).toLocaleString()}` },
+    { key: 'comision', label: 'Comisión (5%)', render: (item) => (
+      <span style={{ color: '#0284c7', fontWeight: 700 }}>
+        Bs. {parseFloat(item.comision_plataforma || (item.monto * 0.05) || 0).toLocaleString()}
+      </span>
+    )},
+    { key: 'monto_neto', label: 'Neto Dueño', render: (item) => (
+      <span style={{ color: '#16a34a', fontWeight: 700 }}>
+        Bs. {parseFloat(item.monto_neto || (item.monto * 0.95) || 0).toLocaleString()}
+      </span>
+    )},
+    { key: 'fecha_pago', label: 'Fecha', render: (item) => item.fecha_pago ? new Date(item.fecha_pago).toLocaleDateString('es-BO') : '—' },
+    { key: 'referencia', label: 'Auditoría Blockchain', render: (item) => (
+      <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', color: '#475569' }}>
+        {item.blockchain_block ? `Bloque #${item.blockchain_block}` : (item.referencia || item.transaccion_id || 'Registrado')}
+      </span>
+    )},
     { key: 'estado', label: 'Estado', render: (item) => {
       const colors = { completado: '#16a34a', pendiente: '#f59e0b', anulado: '#dc2626', parcial: '#3b82f6' };
       return <span style={{ color: colors[item.estado] || '#666', fontWeight: 600, textTransform: 'capitalize' }}>{item.estado}</span>;

@@ -113,17 +113,17 @@ const FinanzasAdmin = () => {
         [],
       ];
 
-      const detalles = (reportData?.tabla_detalles || []);
+      const detalles = (reportData?.tabla_detalles || reportData?.tabla_detalle || []);
       const filasDatos = detalles.map(fila => ([
         fila.fecha,
         fila.inmueble,
         fila.ciudad,
-        fila.tipo_contrato,
+        fila.tipo_contrato || fila.tipo,
         fila.inquilino,
-        fila.monto,
+        fila.monto || fila.comision,
       ]));
 
-      const totalMonto = detalles.reduce((acc, fila) => acc + (fila.monto || 0), 0);
+      const totalMonto = detalles.reduce((acc, fila) => acc + (fila.monto || fila.comision || 0), 0);
 
       const ws = XLSX.utils.aoa_to_sheet([
         ...encabezado,
@@ -496,7 +496,7 @@ const FinanzasAdmin = () => {
         <div className="finanzas-table-container">
           {loading ? (
              <Skeleton width="100%" height="200px" borderRadius="8px" />
-          ) : reportData?.tabla_detalles?.length > 0 ? (
+          ) : (reportData?.tabla_detalles?.length > 0 || reportData?.tabla_detalle?.length > 0) ? (
             <table className="finanzas-table">
               <thead>
                 <tr>
@@ -509,19 +509,19 @@ const FinanzasAdmin = () => {
                 </tr>
               </thead>
               <tbody>
-                {reportData.tabla_detalles.map((fila) => (
+                {(reportData.tabla_detalles || reportData.tabla_detalle).map((fila) => (
                   <tr key={fila.id}>
                     <td>{fila.fecha}</td>
                     <td style={{ fontWeight: 500, color: 'var(--color-text)' }}>{fila.inmueble}</td>
                     <td>{fila.ciudad}</td>
                     <td>
                       <span style={{ background: 'rgba(99, 102, 241, 0.1)', color: 'var(--color-primary-light)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>
-                        {fila.tipo_contrato}
+                        {fila.tipo_contrato || fila.tipo}
                       </span>
                     </td>
                     <td>{fila.inquilino}</td>
                     <td style={{ color: 'var(--color-success)', fontWeight: 700, textAlign: 'right' }}>
-                      {formatterMonto(fila.monto)}
+                      {formatterMonto(fila.monto || fila.comision)}
                     </td>
                   </tr>
                 ))}

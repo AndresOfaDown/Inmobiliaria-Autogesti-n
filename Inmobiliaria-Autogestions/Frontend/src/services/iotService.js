@@ -64,6 +64,15 @@ const iotService = {
     const { data } = await api.delete(`/iot/reglas-acceso/${id}`);
     return data;
   },
+
+  // Sincronizar módulos de alquiler modular con Smart Contract
+  sincronizarModulosAlquiler: async (contratoId, dispositivos) => {
+    const { data } = await api.post('/iot/modular/sincronizar-contrato/', {
+      contrato_id: contratoId,
+      dispositivos,
+    });
+    return data;
+  },
 };
 
 export default iotService;

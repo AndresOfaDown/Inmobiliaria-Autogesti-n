@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDispositivoDto } from './dto/create-dispositivo.dto';
 import { AccionDispositivoDto } from './dto/accion-dispositivo.dto';
@@ -218,6 +219,7 @@ export class IotService {
 
     // Añadir cerraduras donde es propietario
     for (const d of dispositivosPropios) {
+      const config: any = d.configuracion || {};
       llavesMap.set(d.id, {
         id: d.id,
         dispositivo_id: d.id,
@@ -231,6 +233,9 @@ export class IotService {
         bateria: d.bateria,
         bloqueado: d.bloqueado,
         es_propietario: true,
+        contratado: true,
+        bloqueado_por_smart_contract: false,
+        estado_modular: 'propietario_total',
         rol_acceso: 'Propietario',
         tipo_acceso: 'total_propietario',
         pin_codigo: d.codigo_maestro,
@@ -238,6 +243,9 @@ export class IotService {
         inmueble_titulo: d.inmueble.titulo,
         inmueble_ciudad: d.inmueble.ciudad,
         fecha_fin: null,
+        costo_mensual: Number(config.costo_mensual || 0),
+        incluido_base: Boolean(config.incluido_base),
+        descripcion: config.descripcion || '',
       });
     }
 
@@ -245,6 +253,8 @@ export class IotService {
     for (const r of reglas) {
       const d = r.dispositivo;
       if (!d) continue;
+
+      const config: any = d.configuracion || {};
 
       // Si ya está como propietario, tiene precedencia
       if (!llavesMap.has(d.id)) {
@@ -261,18 +271,77 @@ export class IotService {
           bateria: d.bateria,
           bloqueado: d.bloqueado,
           es_propietario: false,
-          rol_acceso: r.tipo_acceso === 'contrato' ? 'Inquilino Titular' : 'Visitante Autorizado',
+          contratado: true,
+          bloqueado_por_smart_contract: false,
+          estado_modular: 'habilitado',
+          rol_acceso: r.tipo_acceso === 'contrato' ? 'Inquilino (Módulo Habilitado)' : 'Visitante Autorizado',
           tipo_acceso: r.tipo_acceso,
           pin_codigo: r.pin_codigo,
           regla_id: r.id,
           contrato_id: r.contrato_id,
-          smart_contract_id: r.contrato?.smart_contract_id || null,
+          smart_contract_id: r.contrato?.smart_contract_id || `CON-${r.contrato_id}`,
           inmueble_id: d.inmueble_id,
           inmueble_titulo: d.inmueble.titulo,
           inmueble_ciudad: d.inmueble.ciudad,
           fecha_inicio: r.fecha_inicio,
           fecha_fin: r.fecha_fin,
+          costo_mensual: Number(config.costo_mensual || 0),
+          incluido_base: Boolean(config.incluido_base),
+          descripcion: config.descripcion || '',
         });
+      }
+    }
+
+    // 3. Módulos del Inmueble Alquilado que NO fueron contratados (Bloqueados por Smart Contract)
+    const contratosInquilino = await this.prisma.contrato.findMany({
+      where: {
+        inquilino_id: user.id,
+        estado: { in: ['activo', 'enviado', 'aceptado'] },
+      },
+      include: {
+        inmueble: {
+          include: { dispositivos_iot: true },
+        },
+      },
+    });
+
+    for (const c of contratosInquilino) {
+      if (!c.inmueble || !c.inmueble.dispositivos_iot) continue;
+
+      for (const d of c.inmueble.dispositivos_iot) {
+        if (!llavesMap.has(d.id)) {
+          // Artefacto no contratado en el alquiler modular -> BLOQUEADO POR SMART CONTRACT
+          const config: any = d.configuracion || {};
+          llavesMap.set(d.id, {
+            id: d.id,
+            dispositivo_id: d.id,
+            nombre: d.nombre,
+            tipo: d.tipo,
+            marca: d.marca,
+            modelo: d.modelo,
+            ubicacion: d.ubicacion,
+            serial_id: d.serial_id,
+            estado_conexion: d.estado_conexion,
+            bateria: d.bateria,
+            bloqueado: true,
+            es_propietario: false,
+            contratado: false,
+            bloqueado_por_smart_contract: true,
+            estado_modular: 'bloqueado',
+            motivo_bloqueo: 'Bloqueado por Smart Contract: Módulo no incluido en el alquiler modular',
+            rol_acceso: 'No Contratado (Módulo Bloqueado)',
+            tipo_acceso: 'modular_no_contratado',
+            pin_codigo: null,
+            contrato_id: c.id,
+            smart_contract_id: c.smart_contract_id || `CON-${c.id}`,
+            inmueble_id: d.inmueble_id,
+            inmueble_titulo: c.inmueble.titulo,
+            inmueble_ciudad: c.inmueble.ciudad,
+            costo_mensual: Number(config.costo_mensual || 0),
+            incluido_base: false,
+            descripcion: config.descripcion || '',
+          });
+        }
       }
     }
 
@@ -331,13 +400,13 @@ export class IotService {
           accion: dto.accion,
           metodo: dto.metodo || 'app',
           resultado: 'rechazado_por_regla',
-          detalles: `Acceso denegado: El usuario ${user.email} no posee una regla de acceso activa ni contrato vigente.`,
+          detalles: `Acceso denegado por Smart Contract: El usuario ${user.email} no tiene contratado el módulo "${dev.nombre}" en su alquiler modular.`,
           ip: ip || '127.0.0.1',
         },
       });
 
       throw new ForbiddenException(
-        'Acceso denegado: No posees privilegios activos para operar esta cerradura inteligente o tu contrato no está vigente.'
+        `🔒 Acceso denegado: El artefacto "${dev.nombre}" no está incluido en tu alquiler modular o tu contrato no está vigente. Habilítalo en tu contrato inteligente.`
       );
     }
 
@@ -346,14 +415,30 @@ export class IotService {
     let mensajeRespuesta = '';
     let detalleAccion = '';
 
-    if (dto.accion === 'desbloquear') {
-      nuevoEstadoBloqueo = false; // Puerta abierta
-      mensajeRespuesta = '¡Cerradura desbloqueada con éxito! La puerta está abierta.';
-      detalleAccion = `Apertura remota autorizada por ${esPropietario ? 'Propietario' : 'Inquilino'} (${user.first_name} ${user.last_name}).`;
-    } else if (dto.accion === 'bloquear') {
-      nuevoEstadoBloqueo = true; // Cerrojo echado
-      mensajeRespuesta = 'Cerradura bloqueada correctamente. El cerrojo de seguridad está activo.';
-      detalleAccion = `Cierre y bloqueo activado por ${user.first_name} ${user.last_name}.`;
+    if (dto.accion === 'desbloquear' || dto.accion === 'encender') {
+      nuevoEstadoBloqueo = false;
+      if (dev.tipo === 'aire_acondicionado') {
+        mensajeRespuesta = `¡${dev.nombre} encendido a 22°C en modo Inverter Frío!`;
+      } else if (dev.tipo === 'smart_tv') {
+        mensajeRespuesta = `¡${dev.nombre} encendido y habilitado para streaming!`;
+      } else if (dev.tipo === 'porton') {
+        mensajeRespuesta = `¡${dev.nombre} abierto con éxito! Portón vehicular en movimiento.`;
+      } else {
+        mensajeRespuesta = '¡Cerradura desbloqueada con éxito! La puerta está abierta.';
+      }
+      detalleAccion = `Acción ${dto.accion} ejecutada por ${esPropietario ? 'Propietario' : 'Inquilino'} (${user.first_name} ${user.last_name}).`;
+    } else if (dto.accion === 'bloquear' || dto.accion === 'apagar') {
+      nuevoEstadoBloqueo = true;
+      if (dev.tipo === 'aire_acondicionado') {
+        mensajeRespuesta = `¡${dev.nombre} apagado y puesto en modo reposo!`;
+      } else if (dev.tipo === 'smart_tv') {
+        mensajeRespuesta = `¡${dev.nombre} apagado y bloqueado!`;
+      } else if (dev.tipo === 'porton') {
+        mensajeRespuesta = `¡${dev.nombre} cerrado con cerrojo de seguridad!`;
+      } else {
+        mensajeRespuesta = 'Cerradura bloqueada correctamente. El cerrojo de seguridad está activo.';
+      }
+      detalleAccion = `Cierre/Apagado activado por ${user.first_name} ${user.last_name}.`;
     } else if (dto.accion === 'generar_pin') {
       const nuevoPin = Math.floor(100000 + Math.random() * 900000).toString();
       detalleAccion = `PIN temporal generado (${nuevoPin}) para acceso de 24 horas.`;
@@ -500,5 +585,163 @@ export class IotService {
       where: { id: reglaId },
       data: { estado: 'revocado', motivo_suspension: 'Revocado manualmente por el propietario' },
     });
+  }
+
+  // ─── ALQUILER MODULAR IOT: ACTUALIZAR Y SINCRONIZAR SMART CONTRACT ─
+  async actualizarModulosAlquiler(contratoId: number, dispositivosIds: number[], user: any) {
+    const contrato = await this.prisma.contrato.findUnique({
+      where: { id: Number(contratoId) },
+      include: {
+        inmueble: {
+          include: { dispositivos_iot: true },
+        },
+      },
+    });
+
+    if (!contrato) throw new NotFoundException('Contrato no encontrado');
+
+    const esInquilino = contrato.inquilino_id === user.id;
+    const esPropietario = contrato.propietario_id === user.id;
+    const esAdmin = user.rol === 'admin';
+
+    if (!esInquilino && !esPropietario && !esAdmin) {
+      throw new ForbiddenException('No tienes permisos para modificar los módulos domóticos de este contrato');
+    }
+
+    const todosDispositivos = contrato.inmueble.dispositivos_iot || [];
+    const seleccionadosSet = new Set(dispositivosIds.map(Number));
+
+    const habilitadosNombres: string[] = [];
+    const bloqueadosNombres: string[] = [];
+
+    for (const dev of todosDispositivos) {
+      const debeEstarActivo = seleccionadosSet.has(dev.id);
+
+      const regla = await this.prisma.reglaAccesoIoT.findFirst({
+        where: {
+          dispositivo_id: dev.id,
+          contrato_id: contrato.id,
+          usuario_id: contrato.inquilino_id,
+        },
+      });
+
+      if (debeEstarActivo) {
+        habilitadosNombres.push(dev.nombre);
+        if (!regla) {
+          await this.prisma.reglaAccesoIoT.create({
+            data: {
+              dispositivo_id: dev.id,
+              usuario_id: contrato.inquilino_id,
+              contrato_id: contrato.id,
+              tipo_acceso: 'contrato',
+              pin_codigo: dev.codigo_maestro || Math.floor(100000 + Math.random() * 900000).toString(),
+              fecha_inicio: contrato.inicio,
+              fecha_fin: contrato.fin,
+              estado: 'activo',
+            },
+          });
+        } else {
+          await this.prisma.reglaAccesoIoT.update({
+            where: { id: regla.id },
+            data: {
+              estado: 'activo',
+              motivo_suspension: null,
+            },
+          });
+        }
+
+        await this.prisma.dispositivoIoT.update({
+          where: { id: dev.id },
+          data: { bloqueado: false },
+        });
+
+        await this.prisma.historialAccionIoT.create({
+          data: {
+            dispositivo_id: dev.id,
+            usuario_id: user.id,
+            accion: 'habilitar_modulo',
+            metodo: 'app',
+            resultado: 'exitoso',
+            detalles: `Smart Contract: Módulo habilitado en alquiler modular por ${user.first_name || 'Usuario'}`,
+          },
+        });
+      } else {
+        bloqueadosNombres.push(dev.nombre);
+        if (regla) {
+          await this.prisma.reglaAccesoIoT.update({
+            where: { id: regla.id },
+            data: {
+              estado: 'suspendido',
+              motivo_suspension: 'Módulo excluido del Alquiler Modular por Smart Contract',
+            },
+          });
+        }
+
+        await this.prisma.dispositivoIoT.update({
+          where: { id: dev.id },
+          data: { bloqueado: true },
+        });
+
+        await this.prisma.historialAccionIoT.create({
+          data: {
+            dispositivo_id: dev.id,
+            usuario_id: user.id,
+            accion: 'bloquear_modulo',
+            metodo: 'app',
+            resultado: 'exitoso',
+            detalles: `Smart Contract: Módulo bloqueado (no incluido en alquiler modular) por ${user.first_name || 'Usuario'}`,
+          },
+        });
+      }
+    }
+
+    // Registrar bloque en Blockchain Audit del Contrato
+    const auditExistente = Array.isArray(contrato.blockchain_audit)
+      ? [...(contrato.blockchain_audit as any[])]
+      : [];
+
+    const txHash =
+      '0x' +
+      crypto
+        .createHash('sha256')
+        .update(`MODULAR-${contrato.id}-${dispositivosIds.sort().join(',')}-${new Date().toISOString()}`)
+        .digest('hex');
+
+    auditExistente.unshift({
+      txId: txHash.substring(0, 34),
+      txName: 'alquilerModularIoT',
+      txType: 'alquilerModularIoT',
+      blockNumber: 3000 + contrato.id,
+      timestamp: new Date().toISOString(),
+      assetId: `CON-${contrato.id}`,
+      actor: `Smart Contract Domótico (${user.email || 'Sistema'})`,
+      hash: txHash,
+      data: {
+        contrato_id: contrato.id,
+        inmueble: contrato.inmueble.titulo,
+        modulos_habilitados: habilitadosNombres,
+        modulos_bloqueados: bloqueadosNombres,
+        total_modulos_activos: habilitadosNombres.length,
+        estado_smart_contract: 'SINCRONIZADO_INMUTABLE',
+      },
+      detalles: {
+        habilitados: habilitadosNombres.join(', '),
+        bloqueados: bloqueadosNombres.join(', '),
+      },
+    });
+
+    await this.prisma.contrato.update({
+      where: { id: contrato.id },
+      data: { blockchain_audit: auditExistente },
+    });
+
+    return {
+      success: true,
+      mensaje: `Alquiler modular actualizado y sincronizado en el Smart Contract. Módulos habilitados: ${habilitadosNombres.length}, Bloqueados: ${bloqueadosNombres.length}.`,
+      habilitados: habilitadosNombres,
+      bloqueados: bloqueadosNombres,
+      blockchain_block: 3000 + contrato.id,
+      blockchain_hash: txHash,
+    };
   }
 }

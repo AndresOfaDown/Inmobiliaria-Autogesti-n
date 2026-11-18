@@ -34,6 +34,7 @@ import useAuth from '../../hooks/useAuth';
 import useAlertConfirm from '../../hooks/useAlertConfirm';
 import api from '../../services/api';
 import pagoService from '../../services/pagoService';
+import contratoService from '../../services/contratoService';
 import { API_BASE_URL } from '../../config';
 import './Propiedades.css';
 
@@ -741,9 +742,11 @@ const MisMensajes = () => {
   // ─── Contratos: Cargar tipos y gestionar ───────────────────
   const fetchTiposContrato = async () => {
     try {
-      const res = await api.get('/inmuebles/tipos-contrato/');
-      setTiposContrato(res.data.results || res.data);
-    } catch { setTiposContrato([]); }
+      const data = await contratoService.getTipos();
+      setTiposContrato(data || []);
+    } catch {
+      setTiposContrato([]);
+    }
   };
 
   const verDetalleContratoLocal = async (idContrato) => {

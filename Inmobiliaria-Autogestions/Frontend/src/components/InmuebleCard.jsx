@@ -1,5 +1,6 @@
 import { formatCurrency } from '../utils/formatDates';
 import Button from './Button';
+import { ShieldCheck, ShieldAlert, ShieldX, ShieldOff } from 'lucide-react';
 import './InmuebleCard.css';
 
 /**
@@ -57,7 +58,18 @@ const InmuebleCard = ({ inmueble, onEdit, onDelete }) => {
         {tipo_nombre && (
           <span className="inmueble-card__tipo">{tipo_nombre}</span>
         )}
-        <h3 className="inmueble-card__titulo">{titulo}</h3>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+          <h3 className="inmueble-card__titulo" style={{ margin: 0, flex: 1 }}>{titulo}</h3>
+          {inmueble.verificacion_estado === 'verificado' ? (
+            <span title="Propiedad Oficialmente Verificada con Valor Legal" style={{ display: 'inline-flex', flexShrink: 0, marginTop: '2px' }}>
+              <ShieldCheck size={18} color="#16a34a" />
+            </span>
+          ) : (
+            <span title="Propiedad sin verificación legal oficial" style={{ display: 'inline-flex', flexShrink: 0, marginTop: '2px' }}>
+              <ShieldOff size={16} color="#94a3b8" />
+            </span>
+          )}
+        </div>
         <p className="inmueble-card__location">
           {ciudad}{zona ? `, ${zona}` : ''}
         </p>

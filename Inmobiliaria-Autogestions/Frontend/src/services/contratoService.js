@@ -13,6 +13,25 @@ const contratoService = {
   },
 
   /**
+   * Obtiene los tipos de contrato disponibles.
+   */
+  getTipos: async () => {
+    try {
+      const { data } = await api.get('/inmuebles/tipos-contrato/');
+      const list = Array.isArray(data) ? data : (data.results || []);
+      if (list && list.length > 0) return list;
+    } catch (e) {
+      console.warn('Error fetching tipos-contrato:', e);
+    }
+    return [
+      { id: 1, nombre: 'Alquiler Habitacional' },
+      { id: 2, nombre: 'Anticrético' },
+      { id: 3, nombre: 'Venta Definitiva' },
+      { id: 4, nombre: 'Alquiler Comercial' },
+    ];
+  },
+
+  /**
    * Aceptar un contrato.
    */
   aceptar: async (id) => {

@@ -122,7 +122,7 @@ const DashboardAdmin = () => {
                     </td>
                     <td>{inm.ciudad}</td>
                     <td style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
-                      Bs. {parseFloat(inm.precio).toLocaleString()}
+                      {inm.precio && !isNaN(parseFloat(inm.precio)) ? `Bs. ${parseFloat(inm.precio).toLocaleString()}` : 'A consultar'}
                     </td>
                     <td>
                       <span className={getEstadoClass(inm.estado)}>{inm.estado}</span>

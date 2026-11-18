@@ -95,7 +95,7 @@ const ManageBlockchain = () => {
     );
   }
 
-  const isConnected = stats && stats.status === 'UP';
+  const isConnected = stats && (stats.status === 'UP' || stats.networkStatus === 'ONLINE');
   const blocksPerPage = 10;
   const totalPages = stats?.blocks ? Math.ceil(stats.blocks.length / blocksPerPage) : 0;
   const paginatedBlocks = stats?.blocks ? stats.blocks.slice((currentPage - 1) * blocksPerPage, currentPage * blocksPerPage) : [];
@@ -359,10 +359,10 @@ const ManageBlockchain = () => {
                         <span style={{ color: 'var(--color-text-muted)' }}>Block Hash:</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
                           <code style={{ background: 'var(--color-bg-secondary)', padding: '2px 6px', borderRadius: '6px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
-                            {block.blockHash.slice(0, 12)}...{block.blockHash.slice(-8)}
+                            {(block.blockHash || block.hash || '').slice(0, 12)}...{(block.blockHash || block.hash || '').slice(-8)}
                           </code>
                           <button 
-                            onClick={(e) => { e.stopPropagation(); handleCopy(block.blockHash, block.blockNumber); }}
+                            onClick={(e) => { e.stopPropagation(); handleCopy(block.blockHash || block.hash, block.blockNumber); }}
                             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: 0 }}
                             title="Copiar Hash"
                           >
@@ -415,13 +415,13 @@ const ManageBlockchain = () => {
                         <div>
                           <span style={{ color: 'var(--color-text-muted)', display: 'block', marginBottom: '2px' }}>Hash Anterior (PrevHash)</span>
                           <code style={{ background: 'var(--color-bg-secondary)', padding: '4px 8px', borderRadius: '6px', display: 'block', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', overflowX: 'auto', whiteSpace: 'nowrap' }}>
-                            {block.prevHash}
+                            {block.prevHash || block.previousHash || '0x00000000000000000000000000000000'}
                           </code>
                         </div>
                         <div>
                           <span style={{ color: 'var(--color-text-muted)', display: 'block', marginBottom: '2px' }}>Hash de Bloque Completo</span>
                           <code style={{ background: 'var(--color-bg-secondary)', padding: '4px 8px', borderRadius: '6px', display: 'block', color: 'var(--color-primary-light)', border: '1px solid var(--color-border)', overflowX: 'auto', whiteSpace: 'nowrap', fontWeight: 600 }}>
-                            {block.blockHash}
+                            {block.blockHash || block.hash || '0x00000000000000000000000000000000'}
                           </code>
                         </div>
                       </div>

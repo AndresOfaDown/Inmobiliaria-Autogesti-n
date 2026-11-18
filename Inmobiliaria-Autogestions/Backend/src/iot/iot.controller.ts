@@ -107,4 +107,14 @@ export class IotController {
   ) {
     return this.iotService.revocarReglaAcceso(id, req.user);
   }
+
+  // ─── ALQUILER MODULAR IOT ─────────────────────────────────────────
+  @Post(['modular/sincronizar-contrato', 'modular/sincronizar-contrato/'])
+  sincronizarModulosAlquiler(
+    @Body('contrato_id', ParseIntPipe) contratoId: number,
+    @Body('dispositivos') dispositivos: number[],
+    @Request() req: any,
+  ) {
+    return this.iotService.actualizarModulosAlquiler(contratoId, dispositivos || [], req.user);
+  }
 }

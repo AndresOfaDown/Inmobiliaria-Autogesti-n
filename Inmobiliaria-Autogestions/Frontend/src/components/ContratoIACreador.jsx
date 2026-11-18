@@ -13,14 +13,37 @@ import contratoService from '../services/contratoService';
  * Columna der: Formulario simplificado con datos básicos (tipo, monto, fechas).
  * Al enviar: llama a /contratos/crear-con-ia/ → crea el contrato y lo manda al cliente.
  */
-const ContratoIACreador = ({ selectedChat, user, tiposContrato, onContratoEnviado, onClose, contratoEdicion }) => {
+const ContratoIACreador = ({ selectedChat, user, tiposContrato: propTipos = [], onContratoEnviado, onClose, contratoEdicion }) => {
   // ── Formulario básico ───────────────────────────────────────
   const inquilinoId = selectedChat?.participante1 === user?.id
     ? selectedChat?.participante2
     : selectedChat?.participante1;
 
+  const DEFAULT_TIPOS = [
+    { id: 1, nombre: 'Alquiler Habitacional' },
+    { id: 2, nombre: 'Anticrético' },
+    { id: 3, nombre: 'Venta Definitiva' },
+    { id: 4, nombre: 'Alquiler Comercial' },
+  ];
+
+  const [tiposContrato, setTiposContrato] = useState(
+    Array.isArray(propTipos) && propTipos.length > 0 ? propTipos : DEFAULT_TIPOS
+  );
+
+  useEffect(() => {
+    if (Array.isArray(propTipos) && propTipos.length > 0) {
+      setTiposContrato(propTipos);
+    } else {
+      contratoService.getTipos().then(tipos => {
+        if (Array.isArray(tipos) && tipos.length > 0) {
+          setTiposContrato(tipos);
+        }
+      });
+    }
+  }, [propTipos]);
+
   const [form, setForm] = useState({
-    tipo_contrato_id: tiposContrato[0]?.id || '',
+    tipo_contrato_id: contratoEdicion?.tipo_contrato_id || (Array.isArray(propTipos) && propTipos[0]?.id) || 1,
     monto: selectedChat?.inmueble_precio || '',
     moneda: 'BOB',
     inicio: new Date().toISOString().split('T')[0],
