@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: saipi_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: saipi_secure_password_2026
+      POSTGRES_DB: inmobiliaria__DB
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: saipi_backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      PORT: 3000
+      DATABASE_URL: "postgresql://postgres:saipi_secure_password_2026@db:5432/inmobiliaria__DB?schema=public"
+      JWT_SECRET: "clave-secreta-jwt-inmobiliaria-dev-2026"
+      JWT_EXPIRES_IN: "1d"
+      JWT_REFRESH_SECRET: "clave-secreta-refresh-inmobiliaria-dev-2026"
+      JWT_REFRESH_EXPIRES_IN: "7d"
+    volumes:
+      - backend_uploads:/app/uploads
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: saipi_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
+  backend_uploads:
