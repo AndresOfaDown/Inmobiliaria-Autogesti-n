@@ -51,6 +51,28 @@ const InmuebleCard = ({ inmueble, onEdit, onDelete }) => {
         <span className={`inmueble-card__badge inmueble-card__badge--${estado}`}>
           {estadoLabel[estado] || estado}
         </span>
+        {inmueble.multimedia?.some(m => m.tipo === 'panorama360') && (
+          <span style={{
+            position: 'absolute',
+            bottom: '10px',
+            right: '10px',
+            background: 'rgba(15, 23, 42, 0.85)',
+            backdropFilter: 'blur(6px)',
+            color: '#38bdf8',
+            padding: '4px 10px',
+            borderRadius: '20px',
+            fontSize: '0.74rem',
+            fontWeight: 700,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            border: '1px solid rgba(56, 189, 248, 0.4)',
+            zIndex: 2
+          }}>
+            🧭 Tour 360°
+          </span>
+        )}
       </div>
 
       {/* ── Body ───────────────────────────── */}

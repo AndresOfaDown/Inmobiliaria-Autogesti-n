@@ -111,12 +111,21 @@ async function main() {
   }
   console.log('✅ Categorías de inmuebles listas.');
 
-  // 5. INMUEBLES (VENTA, ALQUILER, ANTICRÉTICO)
+  // LIMPIEZA IDEMPOTENTE DE REGISTROS PREVIOS
+  console.log('🧹 Limpiando inmuebles y relaciones anteriores para refrescar...');
+  await prisma.pago.deleteMany({});
+  await prisma.reglaAccesoIoT.deleteMany({});
+  await prisma.historialAccionIoT.deleteMany({});
+  await prisma.contrato.deleteMany({});
+  await prisma.dispositivoIoT.deleteMany({});
+  await prisma.inmueble.deleteMany({});
+
+  // 5. INMUEBLES CON FOTOS Y RECORRIDOS 360° COMPLETOS
   const inmueblesData = [
-    // === VENTA ===
+    // === VENTA 1: MANSIÓN CON RECORRIDO VIRTUAL 360° COMPLETO ===
     {
       titulo: 'Mansión Moderna en Urubó Golf',
-      descripcion: 'Impresionante residencia con diseño contemporáneo, acabados en mármol, ventanales de doble altura, piscina infinita temperada y amplia galería churrasquera con vista panorámica a la vegetación.',
+      descripcion: 'Impresionante residencia con diseño contemporáneo, acabados en mármol, ventanales de doble altura, piscina infinita temperada y amplia galería churrasquera con vista panorámica a la vegetación. Cuenta con Recorrido Virtual 360° inmersivo en todas sus plantas.',
       tipo_id: tiposMap['Casa'],
       propietario_id: carlos.id,
       ciudad: 'Santa Cruz',
@@ -139,11 +148,52 @@ async function main() {
       },
       imagen_principal: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80',
       multimedia: [
-        { id: 1, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80', principal: true },
-        { id: 2, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80', principal: false },
-        { id: 3, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80', principal: false },
+        { id: 1, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80', principal: true, descripcion: 'Fachada Principal y Piscina' },
+        { id: 2, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80', principal: false, descripcion: 'Galería Social' },
+        { id: 3, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80', principal: false, descripcion: 'Interiores' },
+        // Panoramas 360° interactivos interconectados con Hotspots 3D
+        {
+          id: 11,
+          tipo: 'panorama360',
+          archivo: '/pano_prueba.png',
+          descripcion: 'Piso 1 | Sala Principal y Galería',
+          orden: 1,
+          hotspots: [
+            { pitch: -2, yaw: 110, escena_destino: 12, texto_ayuda: 'Subir a Master Suite' },
+            { pitch: -4, yaw: -65, escena_destino: 13, texto_ayuda: 'Ir a Dormitorio de Huéspedes' },
+          ],
+        },
+        {
+          id: 12,
+          tipo: 'panorama360',
+          archivo: '/pano_suite_balcon_prueba.png',
+          descripcion: 'Piso 2 | Master Suite con Balcón Panorámico',
+          orden: 2,
+          hotspots: [
+            { pitch: -5, yaw: -80, escena_destino: 11, texto_ayuda: 'Bajar a Sala Principal' },
+          ],
+        },
+        {
+          id: 13,
+          tipo: 'panorama360',
+          archivo: '/pano_habitacion_prueba.png',
+          descripcion: 'Piso 1 | Dormitorio de Huéspedes',
+          orden: 3,
+          hotspots: [
+            { pitch: -3, yaw: 40, escena_destino: 11, texto_ayuda: 'Volver a Sala Principal' },
+          ],
+        },
+        // Música ambiental relajante para el modo VR
+        {
+          id: 21,
+          tipo: 'musica',
+          archivo: '/inspirar.mp3',
+          descripcion: 'Música ambiental inmersiva',
+        },
       ],
     },
+
+    // === VENTA 2: PENTHOUSE EN CALACOTO ===
     {
       titulo: 'Penthouse Dúplex con Terraza y Vista al Illimani',
       descripcion: 'Exclusivo penthouse ubicado en la zona más residencial de Calacoto. Cuenta con chimenea ecológica, suite principal con jacuzzi y vestidor amplio, terraza privada con parrillero y domótica integrada.',
@@ -173,6 +223,8 @@ async function main() {
         { id: 2, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80', principal: false },
       ],
     },
+
+    // === VENTA 3: RESIDENCIA EN TIQUIPAYA ===
     {
       titulo: 'Residencia Campestre Familiar en Tiquipaya',
       descripcion: 'Propiedad con microclima privilegiado rodeada de árboles frutales y jardines paisajísticos. Consta de 4 dormitorios, estar familiar, pozo de agua propio, sistema de riego automatizado y casa de huéspedes.',
@@ -202,6 +254,8 @@ async function main() {
         { id: 2, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80', principal: false },
       ],
     },
+
+    // === VENTA 4: TERRENO CRISTO REDENTOR ===
     {
       titulo: 'Terreno Estratégico Comercial en Av. Cristo Redentor',
       descripcion: 'Lote de terreno de 950 m² con frente de 22 metros sobre avenida de alto tráfico. Ideal para supermercado, torre mixta, concesionaria o clínica privada. Documentación totalmente al día.',
@@ -231,10 +285,10 @@ async function main() {
       ],
     },
 
-    // === ALQUILER ===
+    // === ALQUILER 1: SMART LOFT CON RECORRIDO VIRTUAL 360° COMPLETO ===
     {
       titulo: 'Smart Loft Amoblado en Equipetrol Norte',
-      descripcion: 'Loft de concepto abierto con domótica e IoT integrado. Cerradura inteligente Yale de última generación con acceso mediante app o PIN dinámico. Incluye internet de alta velocidad, smart TV 65", cocina equipada y balcón.',
+      descripcion: 'Loft de concepto abierto con domótica e IoT integrado. Cerradura inteligente Yale de última generación con acceso mediante app o PIN dinámico. Incluye internet de alta velocidad, smart TV 65", cocina equipada, balcón panorámico y Recorrido Virtual 360° en alta definición.',
       tipo_id: tiposMap['Departamento'],
       propietario_id: carlos.id,
       ciudad: 'Santa Cruz',
@@ -250,18 +304,59 @@ async function main() {
       verificacion_estado: 'verificado',
       verificacion_datos: {
         score_confianza: 98.7,
-        resumen_publico: 'Verificado legalmente. Inmueble con contrato inteligente y cerradura IoT vinculada para alquiler modular.',
+        resumen_publico: 'Verificado legalmente. Inmueble con contrato inteligente, cerradura IoT vinculada y Recorrido Virtual 360°.',
         resultado_ia: 'APROBADO_CON_ALTA_CONFIANZA',
         hash_bloque: '0000918237465918237465918237465918237465918237465918237465918237',
         fecha_verificacion: new Date().toISOString(),
       },
       imagen_principal: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80',
       multimedia: [
-        { id: 1, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80', principal: true },
-        { id: 2, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80', principal: false },
-        { id: 3, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80', principal: false },
+        { id: 1, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80', principal: true, descripcion: 'Vista General del Loft' },
+        { id: 2, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80', principal: false, descripcion: 'Living y Cocina Americana' },
+        { id: 3, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80', principal: false, descripcion: 'Dormitorio' },
+        // Panoramas 360° interactivos interconectados con Hotspots 3D
+        {
+          id: 31,
+          tipo: 'panorama360',
+          archivo: '/pano_prueba.png',
+          descripcion: 'Piso 1 | Sala de Estar y Cocina Integrada',
+          orden: 1,
+          hotspots: [
+            { pitch: -2, yaw: 95, escena_destino: 32, texto_ayuda: 'Ir a Suite con Balcón' },
+            { pitch: -3, yaw: -85, escena_destino: 33, texto_ayuda: 'Ir a Dormitorio 2' },
+          ],
+        },
+        {
+          id: 32,
+          tipo: 'panorama360',
+          archivo: '/pano_suite_balcon_prueba.png',
+          descripcion: 'Piso 1 | Suite Principal con Balcón',
+          orden: 2,
+          hotspots: [
+            { pitch: -5, yaw: -70, escena_destino: 31, texto_ayuda: 'Volver a Sala' },
+          ],
+        },
+        {
+          id: 33,
+          tipo: 'panorama360',
+          archivo: '/pano_cuarto_simple_prueba.png',
+          descripcion: 'Piso 1 | Dormitorio 2 / Estudio',
+          orden: 3,
+          hotspots: [
+            { pitch: -2, yaw: 50, escena_destino: 31, texto_ayuda: 'Volver a Sala' },
+          ],
+        },
+        // Música ambiental lounge para el modo VR
+        {
+          id: 41,
+          tipo: 'musica',
+          archivo: '/musicadefondo.mp3',
+          descripcion: 'Música ambiental lounge',
+        },
       ],
     },
+
+    // === ALQUILER 2: SOPOCACHI ===
     {
       titulo: 'Departamento Minimalista en Sopocachi',
       descripcion: 'Departamento muy soleado, piso de madera de ingeniería, cocina americana con mesones de cuarzo blanco, vista panorámica al valle de La Paz. Cerradura inteligente IoT y calefacción central.',
@@ -291,6 +386,8 @@ async function main() {
         { id: 2, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80', principal: false },
       ],
     },
+
+    // === ALQUILER 3: OFICINA TORRE PLATINUM ===
     {
       titulo: 'Oficina Corporativa Piso Alto en Torre Equipetrol',
       descripcion: 'Espacio de trabajo corporativo con divisiones de vidrio templado, sala de juntas ejecutiva, aire acondicionado central inverter, cableado estructurado categoría 6A y sistema de acceso biométrico IoT.',
@@ -320,6 +417,8 @@ async function main() {
         { id: 2, tipo: 'imagen', archivo: 'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200&q=80', principal: false },
       ],
     },
+
+    // === ALQUILER 4: CASA LAS PALMAS ===
     {
       titulo: 'Casa Colonial Moderna en Barrio Las Palmas',
       descripcion: 'Hermosa casa que combina la arquitectura tradicional cruceña con comodidades modernas. Galerías con pilares de madera cuchi, jardín con palmeras, piscina privada y control de portón y cerradura inteligente IoT.',
@@ -350,7 +449,7 @@ async function main() {
       ],
     },
 
-    // === ANTICRÉTICO ===
+    // === ANTICRÉTICO: QUERU QUERU ===
     {
       titulo: 'Departamento de Estilo Europeo en Queru Queru',
       descripcion: 'Exclusiva oferta en anticrético. Departamento con pisos entablonados, caldera propia, cocina equipada con despensa, 3 dormitorios en suite, 2 parqueos cubiertos y amplia baulera.',
@@ -387,7 +486,8 @@ async function main() {
       data: item,
     });
     createdInmuebles.push(inm);
-    console.log(`🏠 Inmueble creado: [${inm.tipo_oferta.toUpperCase()}] ${inm.titulo} (${inm.ciudad}) - Id: ${inm.id}`);
+    const has360 = (item.multimedia as any[])?.some(m => m.tipo === 'panorama360');
+    console.log(`🏠 Inmueble creado: [${inm.tipo_oferta.toUpperCase()}] ${inm.titulo} (${inm.ciudad}) - Id: ${inm.id} ${has360 ? '🧭 [TOUR 360° ACTIVO]' : ''}`);
   }
 
   // 6. CERRADURAS INTELIGENTES IOT PARA ALQUILERES
@@ -542,7 +642,7 @@ async function main() {
     console.log('✅ Contrato, regla IoT y Pago financiero de prueba creados exitosamente.');
   }
 
-  console.log('🎉 ¡Sembrado de datos finalizado con éxito!');
+  console.log('🎉 ¡Sembrado de datos con Recorridos 360° finalizado con éxito!');
 }
 
 main()
