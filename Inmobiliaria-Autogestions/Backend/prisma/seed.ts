@@ -20,7 +20,25 @@ async function main() {
   });
   console.log(`✅ Roles listos: [1] ${rolAdmin.nombre}, [2] ${rolUsuario.nombre}`);
 
-  // 2. USUARIOS
+  // 2. TIPOS DE CONTRATO
+  const tiposContratoData = [
+    { nombre: 'Alquiler Habitacional', descripcion: 'Contrato de arrendamiento para vivienda' },
+    { nombre: 'Alquiler Comercial', descripcion: 'Contrato de arrendamiento para oficinas o comercio' },
+    { nombre: 'Anticrético', descripcion: 'Contrato de anticresis con garantía hipotecaria' },
+    { nombre: 'Venta Definitiva', descripcion: 'Contrato de compraventa de inmueble' },
+  ];
+  const tiposContratoMap: Record<string, number> = {};
+  for (const tc of tiposContratoData) {
+    const res = await prisma.tipoContrato.upsert({
+      where: { nombre: tc.nombre },
+      update: { descripcion: tc.descripcion },
+      create: { nombre: tc.nombre, descripcion: tc.descripcion },
+    });
+    tiposContratoMap[tc.nombre] = res.id;
+  }
+  console.log('✅ Tipos de contrato listos.');
+
+  // 3. USUARIOS
   const passwordAdmin = await bcrypt.hash('admin123', 10);
   const passwordUser = await bcrypt.hash('password123', 10);
 
@@ -73,7 +91,7 @@ async function main() {
   });
   console.log(`✅ Usuarios listos: Admin (${admin.email}), Propietario (${carlos.email}), Inquilino (${inquilino.email})`);
 
-  // 3. TIPOS DE INMUEBLE
+  // 4. TIPOS DE INMUEBLE
   const tiposData = [
     { nombre: 'Casa', descripcion: 'Vivienda unifamiliar independiente' },
     { nombre: 'Departamento', descripcion: 'Unidad residencial en edificio o condominio' },
@@ -93,7 +111,7 @@ async function main() {
   }
   console.log('✅ Categorías de inmuebles listas.');
 
-  // 4. INMUEBLES (VENTA, ALQUILER, ANTICRÉTICO)
+  // 5. INMUEBLES (VENTA, ALQUILER, ANTICRÉTICO)
   const inmueblesData = [
     // === VENTA ===
     {
@@ -372,13 +390,13 @@ async function main() {
     console.log(`🏠 Inmueble creado: [${inm.tipo_oferta.toUpperCase()}] ${inm.titulo} (${inm.ciudad}) - Id: ${inm.id}`);
   }
 
-  // 5. CERRADURAS INTELIGENTES IOT PARA ALQUILERES
-  const smartLoft = createdInmuebles.find(i => i.titulo.includes('Smart Loft'));
-  const casaPalmas = createdInmuebles.find(i => i.titulo.includes('Las Palmas'));
-  const deptoSopocachi = createdInmuebles.find(i => i.titulo.includes('Sopocachi'));
+  // 6. CERRADURAS INTELIGENTES IOT PARA ALQUILERES
+  const smartLoft = createdInmuebles.find((i) => i.titulo.includes('Smart Loft'));
+  const casaPalmas = createdInmuebles.find((i) => i.titulo.includes('Las Palmas'));
+  const deptoSopocachi = createdInmuebles.find((i) => i.titulo.includes('Sopocachi'));
 
   if (smartLoft) {
-    const lock1 = await prisma.dispositivoIoT.create({
+    await prisma.dispositivoIoT.create({
       data: {
         inmueble_id: smartLoft.id,
         nombre: 'Cerradura Inteligente Puerta Principal',
@@ -398,7 +416,6 @@ async function main() {
       },
     });
 
-    // Sensor de apertura complementario
     await prisma.dispositivoIoT.create({
       data: {
         inmueble_id: smartLoft.id,
@@ -454,27 +471,25 @@ async function main() {
     console.log(`🔒 Cerradura IoT creada para Depto Sopocachi (Id: ${deptoSopocachi.id})`);
   }
 
-  // 6. CONTRATO DE PRUEBA Y PAGOS PARA ACTIVAR FINANZAS Y BLOCKCHAIN
+  // 7. CONTRATO DE PRUEBA Y PAGOS PARA ACTIVAR FINANZAS Y BLOCKCHAIN
   if (smartLoft) {
     const contrato = await prisma.contrato.create({
       data: {
         inmueble_id: smartLoft.id,
         propietario_id: carlos.id,
         inquilino_id: inquilino.id,
-        tipo_contrato: 'Alquiler Mensual Residencial',
+        tipo_contrato_id: tiposContratoMap['Alquiler Habitacional'],
         monto: 4200,
         moneda: 'BOB',
         inicio: new Date('2026-11-01'),
         fin: new Date('2027-11-01'),
         dia_pago: 5,
-        deposito_garantia: 4200,
-        estado: 'vigente',
-        smart_contract_id: 'CONTRATO-SMART-2026-001',
-        terminos_clausulas: 'Contrato inteligente de alquiler con cláusula modular de cumplimiento estricto y desbloqueo IoT automatizado.',
+        deposito: 4200,
+        estado: 'activo',
+        clausulas: 'Contrato inteligente de alquiler con cláusula modular y desbloqueo IoT automatizado.',
       },
     });
 
-    // Regla de acceso IoT para el inquilino
     const lock = await prisma.dispositivoIoT.findFirst({
       where: { inmueble_id: smartLoft.id, tipo: 'cerradura' },
     });
@@ -505,7 +520,6 @@ async function main() {
       });
     }
 
-    // Pago verificado con comisión de plataforma (5% = Bs 210, Propietario = Bs 3990)
     await prisma.pago.create({
       data: {
         inmueble_id: smartLoft.id,
@@ -514,15 +528,13 @@ async function main() {
         propietario_id: carlos.id,
         monto: 4200,
         comision_plataforma: 210,
-        monto_neto_propietario: 3990,
+        monto_neto: 3990,
         moneda: 'BOB',
+        tipo: 'alquiler',
         metodo: 'qr',
         estado: 'completado',
         concepto: 'Pago Alquiler Noviembre 2026',
-        numero_transaccion: 'TRX-QR-2026-8841',
-        blockchain_hash: '0000e84b81c9a8d7e6f5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3',
-        bloque_sellado: 2069,
-        codigo_control_fiscal: 'F8-A2-99-B1-4D',
+        transaccion_id: 'TRX-QR-2026-8841',
         fecha_pago: new Date(),
       },
     });
