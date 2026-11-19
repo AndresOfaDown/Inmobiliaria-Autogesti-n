@@ -1393,4 +1393,175 @@ export class InmueblesService {
       transactions: blocks.flatMap((b) => b.transactions),
     };
   }
+
+  // ─── HU-31: CARGAR DATASET Y GESTIÓN MASIVA ──────────────────
+  async getDatasetStats() {
+    const total = await this.prisma.inmueble.count();
+    const ventas = await this.prisma.inmueble.count({ where: { tipo_oferta: 'venta' } });
+    const alquileres = await this.prisma.inmueble.count({ where: { tipo_oferta: 'alquiler' } });
+    const anticreticos = await this.prisma.inmueble.count({ where: { tipo_oferta: 'anticretico' } });
+    const verificados = await this.prisma.inmueble.count({ where: { verificacion_estado: 'verificado' } });
+    const iotTotal = await this.prisma.dispositivoIoT.count();
+    const contratosTotal = await this.prisma.contrato.count();
+
+    const inmuebles = await this.prisma.inmueble.findMany({
+      select: { id: true, ciudad: true, multimedia: true, tipo_oferta: true, precio: true },
+    });
+
+    let con360 = 0;
+    const ciudadesMap: Record<string, number> = {};
+
+    inmuebles.forEach((inm) => {
+      const c = inm.ciudad?.trim() || 'No especificada';
+      ciudadesMap[c] = (ciudadesMap[c] || 0) + 1;
+
+      const media = Array.isArray(inm.multimedia) ? (inm.multimedia as any[]) : [];
+      if (media.some((m) => m.tipo === 'panorama360')) {
+        con360++;
+      }
+    });
+
+    return {
+      total,
+      ventas,
+      alquileres,
+      anticreticos,
+      verificados,
+      con360,
+      iotTotal,
+      contratosTotal,
+      ciudades: Object.entries(ciudadesMap).map(([ciudad, cantidad]) => ({ ciudad, cantidad })),
+    };
+  }
+
+  async cargarDatasetMasivo(inmuebles: any[], currentUser: any) {
+    if (!Array.isArray(inmuebles) || inmuebles.length === 0) {
+      throw new BadRequestException('El dataset debe ser una lista de inmuebles no vacía');
+    }
+
+    let propietarioId = currentUser?.id;
+    if (!propietarioId) {
+      const user = await this.prisma.usuario.findFirst({ where: { rol_relacion: { nombre: 'usuario' } } });
+      propietarioId = user?.id || 1;
+    }
+
+    const tipos = await this.prisma.tipoInmueble.findMany();
+    const tiposMap = new Map<string, number>();
+    tipos.forEach((t) => tiposMap.set(t.nombre.toLowerCase(), t.id));
+
+    const insertados: any[] = [];
+
+    for (let i = 0; i < inmuebles.length; i++) {
+      const item = inmuebles[i];
+      const tipoNombre = (item.tipo || item.tipo_inmueble || item.categoria || 'Departamento').toLowerCase();
+      let tipoId = tiposMap.get(tipoNombre);
+
+      if (!tipoId) {
+        const nuevoTipo = await this.prisma.tipoInmueble.create({
+          data: {
+            nombre: item.tipo || item.tipo_inmueble || item.categoria || 'Otro',
+            descripcion: 'Categoría importada automáticamente mediante Dataset',
+          },
+        });
+        tipoId = nuevoTipo.id;
+        tiposMap.set(tipoNombre, tipoId);
+      }
+
+      const precioNum = Number(item.precio) || 0;
+      const tipoOferta = ['venta', 'alquiler', 'anticretico'].includes(String(item.tipo_oferta || item.oferta).toLowerCase())
+        ? String(item.tipo_oferta || item.oferta).toLowerCase()
+        : 'alquiler';
+
+      const multimedias: any[] = [];
+      const imgPrincipal = item.imagen_principal || item.imagen || item.foto || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80';
+      multimedias.push({
+        id: 1,
+        tipo: 'imagen',
+        archivo: imgPrincipal,
+        principal: true,
+        descripcion: 'Foto principal importada de dataset',
+      });
+
+      // Si incluye fotos 360 en el dataset
+      if (item.panorama_url || item.tour_360) {
+        multimedias.push({
+          id: 11,
+          tipo: 'panorama360',
+          archivo: item.panorama_url || item.tour_360 || '/pano_prueba.png',
+          descripcion: 'Piso 1 | Recorrido Virtual 360°',
+          orden: 1,
+          hotspots: [],
+        });
+      }
+
+      const publicacionesIniciales = [
+        {
+          id: Date.now() + i,
+          tipo_oferta: tipoOferta,
+          precio: precioNum,
+          estado: 'activa',
+          fecha_creacion: new Date().toISOString(),
+        },
+      ];
+
+      const esVerificado = item.verificado === true || item.verificado === 'true' || item.verificado === 1 || item.verificado === 'si';
+
+      const nuevoInm = await this.prisma.inmueble.create({
+        data: {
+          titulo: item.titulo || `Inmueble Importado #${i + 1}`,
+          descripcion: item.descripcion || 'Propiedad cargada mediante importación masiva de dataset.',
+          tipo_id: tipoId,
+          propietario_id: propietarioId,
+          ciudad: item.ciudad || 'Santa Cruz',
+          zona: item.zona || 'Centro',
+          calle: item.calle || item.direccion || 'Av. Principal #100',
+          referencia: item.referencia || '',
+          precio: precioNum,
+          tipo_oferta: tipoOferta,
+          superficie: Number(item.superficie) || 120,
+          habitaciones: Number(item.habitaciones) || 2,
+          banos: Number(item.banos) || 2,
+          garaje: item.garaje === true || item.garaje === 'true' || item.garaje === 1 || item.garaje === 'si',
+          estado: 'disponible',
+          verificacion_estado: esVerificado ? 'verificado' : 'no_solicitado',
+          verificacion_datos: esVerificado
+            ? {
+                score_confianza: 98.2,
+                resumen_publico: 'Título verificado legítimamente por carga de dataset oficial.',
+                resultado_ia: 'APROBADO_CON_ALTA_CONFIANZA',
+                hash_bloque: '0x' + crypto.createHash('sha256').update(`dataset_${Date.now()}_${i}`).digest('hex'),
+                fecha_verificacion: new Date().toISOString(),
+              }
+            : {},
+          imagen_principal: imgPrincipal,
+          multimedia: multimedias,
+          publicaciones: publicacionesIniciales,
+          horarios: [],
+        },
+      });
+
+      insertados.push(nuevoInm);
+    }
+
+    return {
+      success: true,
+      mensaje: `Se importaron ${insertados.length} inmuebles exitosamente al catálogo`,
+      totalImportados: insertados.length,
+      inmuebles: insertados,
+    };
+  }
+
+  async resetearCatalogoDemo(currentUser: any) {
+    await this.prisma.pago.deleteMany({});
+    await this.prisma.reglaAccesoIoT.deleteMany({});
+    await this.prisma.historialAccionIoT.deleteMany({});
+    await this.prisma.contrato.deleteMany({});
+    await this.prisma.dispositivoIoT.deleteMany({});
+    await this.prisma.inmueble.deleteMany({});
+
+    return {
+      success: true,
+      mensaje: 'El catálogo y relaciones asociadas se han restablecido correctamente',
+    };
+  }
 }

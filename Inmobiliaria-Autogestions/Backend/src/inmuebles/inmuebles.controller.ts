@@ -341,4 +341,23 @@ export class InmueblesController {
   getBlockchainStats() {
     return this.inmueblesService.getBlockchainStats();
   }
+
+  // ─── HU-31: DATASET ENDPOINTS ────────────────────────────────
+  @UseGuards(JwtAuthGuard)
+  @Get(['dataset/stats', 'dataset/stats/'])
+  getDatasetStats() {
+    return this.inmueblesService.getDatasetStats();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(['dataset/cargar-masivo', 'dataset/cargar-masivo/'])
+  cargarDatasetMasivo(@Body('inmuebles') inmuebles: any[], @Request() req: any) {
+    return this.inmueblesService.cargarDatasetMasivo(inmuebles, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(['dataset/reset', 'dataset/reset/'])
+  resetDataset(@Request() req: any) {
+    return this.inmueblesService.resetearCatalogoDemo(req.user);
+  }
 }

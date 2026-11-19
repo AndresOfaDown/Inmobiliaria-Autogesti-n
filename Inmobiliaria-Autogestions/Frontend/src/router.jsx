@@ -39,6 +39,7 @@ import ManageHistorialPagos from './pages/Admin/ManageHistorialPagos';
 import ManageAgenda from './pages/Admin/ManageAgenda';
 import ManageNotificaciones from './pages/Admin/ManageNotificaciones';
 import ManageFavoritos from './pages/Admin/ManageFavoritos';
+import ManageDataset from './pages/Admin/ManageDataset';
 import FinanzasAdmin from './pages/Admin/FinanzasAdmin';
 import ManageBlockchain from './pages/Admin/ManageBlockchain';
 import FinanzasPropietario from './pages/Public/FinanzasPropietario';
@@ -152,6 +153,7 @@ const router = createBrowserRouter([
       { path: 'finanzas', element: <FinanzasAdmin /> },
       { path: 'usuarios', element: <ManageUsers /> },
       { path: 'inmuebles', element: <ManageInmuebles /> },
+      { path: 'dataset', element: <ManageDataset /> },
       { path: 'categorias', element: <ManageCategorias /> },
       { path: 'contratos', element: <ManageContratos /> },
       { path: 'pagos', element: <ManagePagos /> },

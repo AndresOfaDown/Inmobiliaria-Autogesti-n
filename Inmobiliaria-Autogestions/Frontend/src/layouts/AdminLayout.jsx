@@ -3,7 +3,7 @@ import { Outlet, NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Home, Archive, FileText, Banknote,
   CreditCard, History, Calendar, Bell, Heart, ChevronRight, ChevronLeft, LineChart, ShieldCheck,
-  Sun, Moon, Monitor
+  Sun, Moon, Monitor, Database
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import useStore from '../store/store';
@@ -59,6 +59,7 @@ const AdminLayout = () => {
       title: 'Inmuebles',
       items: [
         { to: '/panel/inmuebles', label: 'Inmuebles', icon: <Home size={20} /> },
+        { to: '/panel/dataset', label: 'Cargar Dataset', icon: <Database size={20} /> },
         { to: '/panel/categorias', label: 'Categorías', icon: <Archive size={20} /> },
         { to: '/panel/agenda', label: 'Agenda de Visitas', icon: <Calendar size={20} /> }
       ]
