@@ -89,7 +89,23 @@ async function main() {
       foto: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80',
     },
   });
-  console.log(`✅ Usuarios listos: Admin (${admin.email}), Propietario (${carlos.email}), Inquilino (${inquilino.email})`);
+
+  const passwordLeo = await bcrypt.hash('12345678', 10);
+  const leonardo = await prisma.usuario.upsert({
+    where: { email: 'leonardo@inmueble.com' },
+    update: { rol_id: rolAdmin.id, activo: true },
+    create: {
+      email: 'leonardo@inmueble.com',
+      password: passwordLeo,
+      first_name: 'Leonardo',
+      last_name: 'Administrador',
+      telefono: '78899001',
+      ci: '61333148',
+      rol_id: rolAdmin.id,
+      activo: true,
+    },
+  });
+  console.log(`✅ Usuarios listos: Admin (${admin.email}), Leonardo (${leonardo.email}), Propietario (${carlos.email}), Inquilino (${inquilino.email})`);
 
   // 4. TIPOS DE INMUEBLE
   const tiposData = [
